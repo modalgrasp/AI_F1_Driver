@@ -5,14 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.bootstrap_common import repo_root, setup_logger, write_text
-
 
 BADGE_BLOCK_START = "<!-- BOOTSTRAP_BADGES_START -->"
 BADGE_BLOCK_END = "<!-- BOOTSTRAP_BADGES_END -->"
@@ -28,7 +27,9 @@ def update_readme(readme: Path, repo_url: str | None) -> None:
         "![Docs](https://img.shields.io/badge/docs-updated-blue)",
     ]
     if repo_url:
-        badges.append(f"![Repository](https://img.shields.io/badge/repo-configured-success)")
+        badges.append(
+            f"![Repository](https://img.shields.io/badge/repo-configured-success)"
+        )
     badges.append(BADGE_BLOCK_END)
     badge_text = "\n".join(badges)
 
@@ -69,7 +70,9 @@ def write_quickstart(root: Path, repo_url: str | None) -> Path:
     if repo_url:
         lines.append(f"```bash\ngit clone {repo_url}\ncd F1\n```")
     else:
-        lines.append("```bash\n# use your repository URL\ngit clone <repo-url>\ncd F1\n```")
+        lines.append(
+            "```bash\n# use your repository URL\ngit clone <repo-url>\ncd F1\n```"
+        )
 
     lines.extend(
         [
@@ -111,7 +114,9 @@ def write_workflow_diagram(root: Path) -> Path:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Update documentation after repository bootstrap")
+    parser = argparse.ArgumentParser(
+        description="Update documentation after repository bootstrap"
+    )
     parser.add_argument("--repo-url", default=None)
     args = parser.parse_args()
 
@@ -125,7 +130,10 @@ def main() -> int:
     report = {
         "updated": ["README.md", str(quick), str(diagram)],
     }
-    write_text(root / "docs" / "reports" / "bootstrap_docs_update.json", json.dumps(report, indent=2))
+    write_text(
+        root / "docs" / "reports" / "bootstrap_docs_update.json",
+        json.dumps(report, indent=2),
+    )
     logger.info("Bootstrap docs updated.")
     print(json.dumps(report, indent=2))
     return 0

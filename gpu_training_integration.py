@@ -33,14 +33,37 @@ class TrainingPreset:
 
 
 PRESETS = {
-    "maximum_speed": TrainingPreset("maximum_speed", batch_size=2048, learning_rate=3e-4, n_steps=4096, use_amp=True, gradient_accumulation=1),
-    "balanced": TrainingPreset("balanced", batch_size=1024, learning_rate=3e-4, n_steps=2048, use_amp=True, gradient_accumulation=1),
-    "memory_efficient": TrainingPreset("memory_efficient", batch_size=512, learning_rate=2e-4, n_steps=1024, use_amp=True, gradient_accumulation=2),
+    "maximum_speed": TrainingPreset(
+        "maximum_speed",
+        batch_size=2048,
+        learning_rate=3e-4,
+        n_steps=4096,
+        use_amp=True,
+        gradient_accumulation=1,
+    ),
+    "balanced": TrainingPreset(
+        "balanced",
+        batch_size=1024,
+        learning_rate=3e-4,
+        n_steps=2048,
+        use_amp=True,
+        gradient_accumulation=1,
+    ),
+    "memory_efficient": TrainingPreset(
+        "memory_efficient",
+        batch_size=512,
+        learning_rate=2e-4,
+        n_steps=1024,
+        use_amp=True,
+        gradient_accumulation=2,
+    ),
 }
 
 
 class GPUReplayBuffer:
-    def __init__(self, capacity: int, obs_dim: int, action_dim: int, device: str = "cuda:0") -> None:
+    def __init__(
+        self, capacity: int, obs_dim: int, action_dim: int, device: str = "cuda:0"
+    ) -> None:
         self.capacity = capacity
         self.device = device if torch.cuda.is_available() else "cpu"
         self.obs = torch.empty((capacity, obs_dim), device=self.device)
@@ -80,17 +103,36 @@ def configure_dataloader_like_settings() -> dict[str, Any]:
     }
 
 
-def configure_sb3_device(preset: TrainingPreset, env_id: str = "CartPole-v1") -> dict[str, Any]:
+def configure_sb3_device(
+    preset: TrainingPreset, env_id: str = "CartPole-v1"
+) -> dict[str, Any]:
     if PPO is None:
-        return {"available": False, "reason": "stable_baselines3 not installed for this Python version"}
+        return {
+            "available": False,
+            "reason": "stable_baselines3 not installed for this Python version",
+        }
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = PPO("MlpPolicy", env_id, device=device, batch_size=preset.batch_size, n_steps=preset.n_steps, learning_rate=preset.learning_rate, verbose=0)
-    return {"available": True, "device": device, "policy": str(type(model.policy).__name__)}
+    model = PPO(
+        "MlpPolicy",
+        env_id,
+        device=device,
+        batch_size=preset.batch_size,
+        n_steps=preset.n_steps,
+        learning_rate=preset.learning_rate,
+        verbose=0,
+    )
+    return {
+        "available": True,
+        "device": device,
+        "policy": str(type(model.policy).__name__),
+    }
 
 
 def dummy_training_loop(preset: TrainingPreset, steps: int = 200) -> dict[str, Any]:
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    model = torch.nn.Sequential(torch.nn.Linear(128, 256), torch.nn.ReLU(), torch.nn.Linear(256, 64)).to(device)
+    model = torch.nn.Sequential(
+        torch.nn.Linear(128, 256), torch.nn.ReLU(), torch.nn.Linear(256, 64)
+    ).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=preset.learning_rate)
 
     amp_enabled = preset.use_amp and torch.cuda.is_available()
@@ -99,7 +141,9 @@ def dummy_training_loop(preset: TrainingPreset, steps: int = 200) -> dict[str, A
     for _ in range(steps):
         x = torch.randn((preset.batch_size, 128), device=device)
         y = torch.randn((preset.batch_size, 64), device=device)
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=amp_enabled):
+        with torch.autocast(
+            device_type="cuda", dtype=torch.float16, enabled=amp_enabled
+        ):
             out = model(x)
             loss = torch.nn.functional.mse_loss(out.float(), y.float())
         scaler.scale(loss).backward()
@@ -115,7 +159,9 @@ def dummy_training_loop(preset: TrainingPreset, steps: int = 200) -> dict[str, A
 def main() -> int:
     parser = argparse.ArgumentParser(description="GPU training integration presets")
     parser.add_argument("--preset", choices=list(PRESETS.keys()), default="balanced")
-    parser.add_argument("--output", type=Path, default=Path("logs/gpu_training_integration_report.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("logs/gpu_training_integration_report.json")
+    )
     args = parser.parse_args()
 
     mgr = GPUConfigManager("configs/gpu_config.json")

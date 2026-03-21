@@ -17,6 +17,7 @@ try:
     Style = _colorama.Style
     init = _colorama.init
 except Exception:  # pragma: no cover - fallback when colorama is missing
+
     class _DummyColor:
         RED = ""
         GREEN = ""
@@ -32,10 +33,15 @@ except Exception:  # pragma: no cover - fallback when colorama is missing
         del args, kwargs
         return None
 
+
 from environments.assetto_corsa_connector import AssettoCorsa_Connector
 from environments.f1_racing_env import F1RacingEnv
-from utils.config_manager import ConfigManager, ConfigError
-from utils.logger_config import check_cuda_availability, detect_compute_capability, get_system_info
+from utils.config_manager import ConfigError, ConfigManager
+from utils.logger_config import (
+    check_cuda_availability,
+    detect_compute_capability,
+    get_system_info,
+)
 
 init(autoreset=True)
 
@@ -84,7 +90,11 @@ class ValidationRunner:
 
     def check_python_version(self) -> None:
         ok = sys.version_info >= (3, 10)
-        self.add_result("Python Version", ok, f"Detected {platform.python_version()} (required >= 3.10)")
+        self.add_result(
+            "Python Version",
+            ok,
+            f"Detected {platform.python_version()} (required >= 3.10)",
+        )
 
     def check_required_packages(self) -> None:
         missing: list[str] = []
@@ -104,7 +114,11 @@ class ValidationRunner:
         self.add_result(
             "Required Packages",
             not missing,
-            "All packages available" if not missing else f"Missing packages: {', '.join(missing)}",
+            (
+                "All packages available"
+                if not missing
+                else f"Missing packages: {', '.join(missing)}"
+            ),
         )
 
         if not sb3_needed:
@@ -121,7 +135,9 @@ class ValidationRunner:
             importlib.import_module("utils.logger_config")
             importlib.import_module("environments.assetto_corsa_connector")
             importlib.import_module("environments.f1_racing_env")
-            self.add_result("Custom Module Imports", True, "Custom modules import successfully")
+            self.add_result(
+                "Custom Module Imports", True, "Custom modules import successfully"
+            )
         except Exception as exc:
             self.add_result("Custom Module Imports", False, f"Import failed: {exc}")
 
@@ -139,23 +155,35 @@ class ValidationRunner:
         vram = data.get("vram_gb")
         capability = detect_compute_capability()
         ok = vram is not None
-        self.add_result("GPU Memory", ok, f"vram_gb={vram}, compute_capability={capability}")
+        self.add_result(
+            "GPU Memory", ok, f"vram_gb={vram}, compute_capability={capability}"
+        )
 
     def check_assetto_installation(self) -> None:
         try:
-            connector = AssettoCorsa_Connector(config_path=self.root / "configs/config.json")
+            connector = AssettoCorsa_Connector(
+                config_path=self.root / "configs/config.json"
+            )
             connector.validate_installation()
-            self.add_result("Assetto Corsa Install", True, f"Found at {connector.install_path}")
+            self.add_result(
+                "Assetto Corsa Install", True, f"Found at {connector.install_path}"
+            )
         except Exception as exc:
             self.add_result("Assetto Corsa Install", False, str(exc))
 
     def check_shared_memory(self) -> None:
         try:
-            connector = AssettoCorsa_Connector(config_path=self.root / "configs/config.json")
+            connector = AssettoCorsa_Connector(
+                config_path=self.root / "configs/config.json"
+            )
             connector.connect_shared_memory()
             state = connector.read_state()
             connector.disconnect_shared_memory()
-            self.add_result("Shared Memory Access", True, f"Read state keys: {sorted(state.keys())[:4]}...")
+            self.add_result(
+                "Shared Memory Access",
+                True,
+                f"Read state keys: {sorted(state.keys())[:4]}...",
+            )
         except Exception as exc:
             self.add_result(
                 "Shared Memory Access",
@@ -176,7 +204,9 @@ class ValidationRunner:
             env = F1RacingEnv(config_path=str(self.root / "configs/config.json"))
             obs, _ = env.reset(seed=123)
             env.close()
-            self.add_result("Environment Creation", True, f"Observation shape: {obs.shape}")
+            self.add_result(
+                "Environment Creation", True, f"Observation shape: {obs.shape}"
+            )
         except Exception as exc:
             self.add_result("Environment Creation", False, str(exc))
 
@@ -192,7 +222,11 @@ class ValidationRunner:
                 if terminated or truncated:
                     break
             env.close()
-            self.add_result("Sanity Episode", True, f"Ran random policy, total_reward={total_reward:.3f}")
+            self.add_result(
+                "Sanity Episode",
+                True,
+                f"Ran random policy, total_reward={total_reward:.3f}",
+            )
         except Exception as exc:
             self.add_result("Sanity Episode", False, str(exc))
 
@@ -213,7 +247,11 @@ class ValidationRunner:
             lines.append(f"- {name}: {'PASS' if ok else 'FAIL'} | {message}")
 
         report_path.write_text("\n".join(lines), encoding="utf-8")
-        print(Fore.YELLOW + f"Validation report written to: {report_path}" + Style.RESET_ALL)
+        print(
+            Fore.YELLOW
+            + f"Validation report written to: {report_path}"
+            + Style.RESET_ALL
+        )
 
 
 def main() -> int:

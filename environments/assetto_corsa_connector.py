@@ -71,7 +71,9 @@ class AssettoCorsa_Connector:
                 LOGGER.info("Using configured Assetto Corsa path: %s", candidate)
                 return candidate
 
-        search_paths = self.COMMON_PATHS_WINDOWS if os.name == "nt" else self.COMMON_PATHS_LINUX
+        search_paths = (
+            self.COMMON_PATHS_WINDOWS if os.name == "nt" else self.COMMON_PATHS_LINUX
+        )
         for candidate in search_paths:
             if candidate.exists():
                 LOGGER.info("Discovered Assetto Corsa path: %s", candidate)
@@ -106,7 +108,9 @@ class AssettoCorsa_Connector:
         LOGGER.info("Assetto Corsa installation validated at %s", self.install_path)
         return True
 
-    def launch_game(self, wait_seconds: int = 8, timeout_seconds: int = 120) -> subprocess.Popen[Any]:
+    def launch_game(
+        self, wait_seconds: int = 8, timeout_seconds: int = 120
+    ) -> subprocess.Popen[Any]:
         """Launch Assetto Corsa executable and wait briefly for startup.
 
         Args:
@@ -121,7 +125,9 @@ class AssettoCorsa_Connector:
         """
         del timeout_seconds  # Reserved for future process health checks.
 
-        exe_name = self.config["assetto_corsa"].get("executable_name", "AssettoCorsa.exe")
+        exe_name = self.config["assetto_corsa"].get(
+            "executable_name", "AssettoCorsa.exe"
+        )
         exe_path = self.install_path / exe_name
         if not exe_path.exists():
             raise AssettoCorsaConnectorError(f"Game executable not found: {exe_path}")
@@ -179,7 +185,9 @@ class AssettoCorsa_Connector:
             "damage": frame.damage,
         }
 
-    def send_action(self, steering: float, throttle: float, brake: float, gear_delta: float) -> None:
+    def send_action(
+        self, steering: float, throttle: float, brake: float, gear_delta: float
+    ) -> None:
         """Send control action to game input bridge.
 
         In this phase, actions are cached and logged. In future phases, replace this
@@ -204,6 +212,8 @@ class AssettoCorsa_Connector:
         self.config_manager.save()
 
     @classmethod
-    def from_config(cls, config_path: str | Path = "configs/config.json") -> "AssettoCorsa_Connector":
+    def from_config(
+        cls, config_path: str | Path = "configs/config.json"
+    ) -> "AssettoCorsa_Connector":
         """Factory helper for explicit construction patterns."""
         return cls(config_path=config_path)

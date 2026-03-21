@@ -108,7 +108,9 @@ class ConfigManager:
             ConfigError: If the file is invalid JSON or contains invalid values.
         """
         if not self.config_path.exists():
-            LOGGER.warning("Config not found at %s. Creating with defaults.", self.config_path)
+            LOGGER.warning(
+                "Config not found at %s. Creating with defaults.", self.config_path
+            )
             self._config = deepcopy(self.DEFAULT_CONFIG)
             self.save()
             return self._config
@@ -119,7 +121,9 @@ class ConfigManager:
         except json.JSONDecodeError as exc:
             raise ConfigError(f"Invalid JSON in {self.config_path}: {exc}") from exc
         except OSError as exc:
-            raise ConfigError(f"Failed to read config {self.config_path}: {exc}") from exc
+            raise ConfigError(
+                f"Failed to read config {self.config_path}: {exc}"
+            ) from exc
 
         self._config = self._merge_dicts(deepcopy(self.DEFAULT_CONFIG), user_config)
         self.validate(self._config)
@@ -162,7 +166,9 @@ class ConfigManager:
             with self.config_path.open("w", encoding="utf-8") as file:
                 json.dump(payload, file, indent=2)
         except OSError as exc:
-            raise ConfigError(f"Failed to save config {self.config_path}: {exc}") from exc
+            raise ConfigError(
+                f"Failed to save config {self.config_path}: {exc}"
+            ) from exc
 
     @classmethod
     def validate(cls, config: dict[str, Any]) -> None:
@@ -177,7 +183,9 @@ class ConfigManager:
         try:
             polling_hz = int(config["assetto_corsa"]["shared_memory"]["polling_hz"])
             if polling_hz < 1 or polling_hz > 1000:
-                raise ConfigError("assetto_corsa.shared_memory.polling_hz must be in [1, 1000]")
+                raise ConfigError(
+                    "assetto_corsa.shared_memory.polling_hz must be in [1, 1000]"
+                )
 
             max_steps = int(config["training"]["max_episode_steps"])
             if max_steps < 1:
@@ -189,7 +197,9 @@ class ConfigManager:
 
             level = str(config["logging"]["level"]).upper()
             if level not in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}:
-                raise ConfigError("logging.level must be one of DEBUG/INFO/WARNING/ERROR/CRITICAL")
+                raise ConfigError(
+                    "logging.level must be one of DEBUG/INFO/WARNING/ERROR/CRITICAL"
+                )
 
         except KeyError as exc:
             raise ConfigError(f"Missing required config key: {exc}") from exc

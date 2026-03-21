@@ -45,7 +45,9 @@ def integrate(track_id: str, episodes: int = 1) -> dict:
 
             # Approximate sector index from normalized lap progress.
             if centerline.shape[0] > 0:
-                ratio = lap_progress / max(1.0, np.max(centerline[:, 0]) - np.min(centerline[:, 0]))
+                ratio = lap_progress / max(
+                    1.0, np.max(centerline[:, 0]) - np.min(centerline[:, 0])
+                )
                 if ratio < 0.33:
                     sector_hits.add(1)
                 elif ratio < 0.66:
@@ -75,7 +77,9 @@ def integrate(track_id: str, episodes: int = 1) -> dict:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Integrate track data with RL environment")
+    parser = argparse.ArgumentParser(
+        description="Integrate track data with RL environment"
+    )
     parser.add_argument("--track-id", default="yas_marina")
     parser.add_argument("--episodes", type=int, default=1)
     args = parser.parse_args()

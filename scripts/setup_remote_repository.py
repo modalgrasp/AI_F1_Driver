@@ -10,17 +10,23 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
-import sys
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.bootstrap_common import repo_root, run_cmd, setup_logger, utc_now, write_json, write_text
-
+from scripts.bootstrap_common import (
+    repo_root,
+    run_cmd,
+    setup_logger,
+    utc_now,
+    write_json,
+    write_text,
+)
 
 URL_RE = re.compile(
     r"^(?:git@[^:]+:[^\s]+\.git|https://[^\s]+(?:\.git)?)$",
@@ -54,7 +60,9 @@ def parse_github_repo(url: str) -> tuple[str, str] | None:
     return None
 
 
-def set_remote(root: Path, remote: str, url: str, dry_run: bool, logger) -> dict[str, Any]:
+def set_remote(
+    root: Path, remote: str, url: str, dry_run: bool, logger
+) -> dict[str, Any]:
     existing = run_cmd(["git", "remote"], cwd=root)
     remotes = existing.stdout.splitlines() if existing.returncode == 0 else []
 
@@ -93,23 +101,31 @@ def maybe_configure_credentials(root: Path, url: str, dry_run: bool, logger) -> 
         if dry_run:
             return "dry-run"
         # Windows Git Credential Manager is standard; use cache helper as fallback on other OS.
-        if Path("C:/Program Files/Git/mingw64/libexec/git-core/git-credential-manager-core.exe").exists():
+        if Path(
+            "C:/Program Files/Git/mingw64/libexec/git-core/git-credential-manager-core.exe"
+        ).exists():
             run_cmd(["git", "config", "credential.helper", "manager-core"], cwd=root)
             return "manager-core"
-        run_cmd(["git", "config", "credential.helper", "cache --timeout=3600"], cwd=root)
+        run_cmd(
+            ["git", "config", "credential.helper", "cache --timeout=3600"], cwd=root
+        )
         return "cache"
     logger.info("SSH remote detected; credential helper unchanged.")
     return "ssh"
 
 
-def push_initial(root: Path, remote: str, branch: str, dry_run: bool, logger) -> dict[str, Any]:
+def push_initial(
+    root: Path, remote: str, branch: str, dry_run: bool, logger
+) -> dict[str, Any]:
     if dry_run:
         return {"branch_push": "dry-run", "tags_push": "dry-run"}
 
     branch_push = run_cmd(["git", "push", "-u", remote, branch], cwd=root)
     tags_push = run_cmd(["git", "push", remote, "--tags"], cwd=root)
     if branch_push.returncode != 0:
-        logger.warning("Branch push failed: %s", branch_push.stderr or branch_push.stdout)
+        logger.warning(
+            "Branch push failed: %s", branch_push.stderr or branch_push.stdout
+        )
     if tags_push.returncode != 0:
         logger.warning("Tag push failed: %s", tags_push.stderr or tags_push.stdout)
 
@@ -121,7 +137,9 @@ def push_initial(root: Path, remote: str, branch: str, dry_run: bool, logger) ->
     }
 
 
-def github_branch_protection(url: str, token: str | None, dry_run: bool, logger) -> dict[str, Any]:
+def github_branch_protection(
+    url: str, token: str | None, dry_run: bool, logger
+) -> dict[str, Any]:
     info = {"applied": False, "reason": "not-applicable"}
     parsed = parse_github_repo(url)
     if not parsed:
@@ -161,9 +179,17 @@ def github_branch_protection(url: str, token: str | None, dry_run: bool, logger)
         with urllib.request.urlopen(req, timeout=20) as response:
             body = response.read().decode("utf-8", errors="ignore")
             logger.info("GitHub branch protection response: %s", response.status)
-            return {"applied": response.status in {200, 201}, "status": response.status, "body": body[:400]}
+            return {
+                "applied": response.status in {200, 201},
+                "status": response.status,
+                "body": body[:400],
+            }
     except urllib.error.HTTPError as exc:
-        return {"applied": False, "reason": f"http-{exc.code}", "body": exc.read().decode("utf-8", errors="ignore")[:400]}
+        return {
+            "applied": False,
+            "reason": f"http-{exc.code}",
+            "body": exc.read().decode("utf-8", errors="ignore")[:400],
+        }
     except Exception as exc:
         return {"applied": False, "reason": str(exc)}
 
@@ -180,7 +206,7 @@ def write_access_guide(root: Path, remote_url: str, branch: str) -> Path:
         f"```bash\ngit clone {remote_url}\ncd F1\ngit checkout {branch}\n```",
         "",
         "## SSH Setup",
-        "```bash\nssh-keygen -t ed25519 -C \"your_email@example.com\"\n# add public key to your git provider\n```",
+        '```bash\nssh-keygen -t ed25519 -C "your_email@example.com"\n# add public key to your git provider\n```',
         "",
         "## HTTPS Token Setup",
         "Create a personal access token with repository scope and use it as password when prompted.",
@@ -212,12 +238,18 @@ def write_badges(root: Path, platform: str, remote_url: str) -> Path:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Set up and validate repository remote configuration")
-    parser.add_argument("--platform", choices=["github", "gitlab", "bitbucket", "custom"], default=None)
+    parser = argparse.ArgumentParser(
+        description="Set up and validate repository remote configuration"
+    )
+    parser.add_argument(
+        "--platform", choices=["github", "gitlab", "bitbucket", "custom"], default=None
+    )
     parser.add_argument("--remote-url", default=None)
     parser.add_argument("--remote", default="origin")
     parser.add_argument("--branch", default="main")
-    parser.add_argument("--visibility", choices=["public", "private"], default="private")
+    parser.add_argument(
+        "--visibility", choices=["public", "private"], default="private"
+    )
     parser.add_argument("--github-token", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interactive", action="store_true")
@@ -243,7 +275,9 @@ def main() -> int:
     try:
         remote_info = set_remote(root, args.remote, remote_url, args.dry_run, logger)
         configure_git_defaults(root, args.dry_run)
-        credential_helper = maybe_configure_credentials(root, remote_url, args.dry_run, logger)
+        credential_helper = maybe_configure_credentials(
+            root, remote_url, args.dry_run, logger
+        )
         push_info = push_initial(root, args.remote, args.branch, args.dry_run, logger)
         protection = github_branch_protection(
             remote_url,

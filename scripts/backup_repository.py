@@ -7,10 +7,10 @@ import argparse
 import hashlib
 import json
 import shutil
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-import sys
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -35,15 +35,25 @@ def backup_full(root: Path, destination: Path, include_artifacts: bool) -> Path:
     base_name = destination / archive_name("full_repo_backup")
     ignore = None
     if not include_artifacts:
-        ignore = shutil.ignore_patterns("logs", "f1_racing_env", ".venv", "__pycache__", "*.pt", "*.pth")
-    archive = shutil.make_archive(str(base_name), "zip", root_dir=str(root), base_dir=".", logger=None)
+        ignore = shutil.ignore_patterns(
+            "logs", "f1_racing_env", ".venv", "__pycache__", "*.pt", "*.pth"
+        )
+    archive = shutil.make_archive(
+        str(base_name), "zip", root_dir=str(root), base_dir=".", logger=None
+    )
     return Path(archive)
 
 
 def backup_config(root: Path, destination: Path) -> Path:
     temp = destination / archive_name("config_backup")
     temp.mkdir(parents=True, exist_ok=True)
-    for rel in ["configs", ".gitignore", ".gitattributes", "requirements.txt", "requirements-dev.txt"]:
+    for rel in [
+        "configs",
+        ".gitignore",
+        ".gitattributes",
+        "requirements.txt",
+        "requirements-dev.txt",
+    ]:
         src = root / rel
         if not src.exists():
             continue

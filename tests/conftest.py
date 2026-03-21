@@ -25,7 +25,9 @@ def sample_track_data() -> dict:
 @pytest.fixture
 def dummy_env_config(tmp_path: Path) -> Path:
     cfg = {
-        "assetto_corsa": {"install_path": "D:/SteamLibrary/steamapps/common/assettocorsa"},
+        "assetto_corsa": {
+            "install_path": "D:/SteamLibrary/steamapps/common/assettocorsa"
+        },
         "training": {"max_episode_steps": 1000},
     }
     path = tmp_path / "config.json"

@@ -60,7 +60,13 @@ def check_python_syntax(path: Path) -> bool:
 def check_git(root: Path) -> bool:
     if not (root / ".git").exists():
         return False
-    proc = subprocess.run(["git", "status", "--porcelain"], cwd=root, capture_output=True, text=True, check=False)
+    proc = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     return proc.returncode == 0
 
 

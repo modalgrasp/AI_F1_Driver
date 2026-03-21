@@ -23,7 +23,9 @@ LOGGER = logging.getLogger(__name__)
 
 def run_random_policy_test(episodes: int = 5) -> None:
     """Run random agent episodes and assert basic environment correctness."""
-    env = F1RacingEnv(config_path="configs/config.json", action_mode="continuous", render_mode="none")
+    env = F1RacingEnv(
+        config_path="configs/config.json", action_mode="continuous", render_mode="none"
+    )
     assert env.observation_space.shape == (20,), "Unexpected observation space shape"
 
     tracemalloc.start()
@@ -32,7 +34,9 @@ def run_random_policy_test(episodes: int = 5) -> None:
     step_times: list[float] = []
     for episode in range(episodes):
         observation, info = env.reset(seed=episode)
-        assert env.observation_space.contains(observation), "Reset observation out of bounds"
+        assert env.observation_space.contains(
+            observation
+        ), "Reset observation out of bounds"
         LOGGER.info("Episode %d started. info=%s", episode + 1, info)
 
         total_reward = 0.0
@@ -46,10 +50,14 @@ def run_random_policy_test(episodes: int = 5) -> None:
                 assert env.action_space.contains(action), "Sampled action out of bounds"
 
             t0 = time.perf_counter()
-            next_observation, reward, terminated, truncated, step_info = env.step(action)
+            next_observation, reward, terminated, truncated, step_info = env.step(
+                action
+            )
             step_times.append((time.perf_counter() - t0) * 1000.0)
 
-            assert env.observation_space.contains(next_observation), "Step observation out of bounds"
+            assert env.observation_space.contains(
+                next_observation
+            ), "Step observation out of bounds"
             assert isinstance(reward, float), "Reward must be float"
             assert isinstance(step_info, dict), "Info must be dict"
 

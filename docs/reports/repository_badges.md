@@ -1,0 +1,5 @@
+![Build](https://github.com/modalgrasp/AI_F1_Driver/actions/workflows/tests.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.10%2B-yellow)
+![Coverage](https://img.shields.io/badge/coverage-pending-lightgrey)
+![Docs](https://img.shields.io/badge/docs-mkdocs-blue)

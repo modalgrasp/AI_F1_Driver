@@ -41,7 +41,9 @@ class GPUProfiler:
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
-    def profile_callable(self, fn: Callable[[], Any], trace_name: str = "profile_run") -> dict[str, Any]:
+    def profile_callable(
+        self, fn: Callable[[], Any], trace_name: str = "profile_run"
+    ) -> dict[str, Any]:
         trace_path = self.log_dir / f"{trace_name}.json"
         if not torch.cuda.is_available():
             t0 = time.perf_counter()
@@ -49,7 +51,10 @@ class GPUProfiler:
             return {"cuda": False, "seconds": time.perf_counter() - t0, "trace": None}
 
         with torch.profiler.profile(
-            activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+            activities=[
+                torch.profiler.ProfilerActivity.CPU,
+                torch.profiler.ProfilerActivity.CUDA,
+            ],
             profile_memory=True,
             with_stack=False,
             record_shapes=True,
@@ -62,12 +67,16 @@ class GPUProfiler:
         summary_path = self.log_dir / f"{trace_name}_summary.txt"
         summary_path.write_text(table, encoding="utf-8")
 
-        chrome = prof.key_averages(group_by_input_shape=True).table(sort_by="self_cuda_time_total", row_limit=50)
+        chrome = prof.key_averages(group_by_input_shape=True).table(
+            sort_by="self_cuda_time_total", row_limit=50
+        )
         trace_path.write_text(json.dumps({"summary": chrome}), encoding="utf-8")
 
         return {"cuda": True, "summary": str(summary_path), "trace": str(trace_path)}
 
-    def quick_memory_timeline(self, output: str | Path = "logs/profiler/memory_timeline.json") -> Path:
+    def quick_memory_timeline(
+        self, output: str | Path = "logs/profiler/memory_timeline.json"
+    ) -> Path:
         out = Path(output)
         if not torch.cuda.is_available():
             out.write_text(json.dumps({"cuda": False}, indent=2), encoding="utf-8")

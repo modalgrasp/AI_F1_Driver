@@ -5,14 +5,21 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
-import sys
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.bootstrap_common import repo_root, run_cmd, setup_logger, utc_now, write_json, write_text
+from scripts.bootstrap_common import (
+    repo_root,
+    run_cmd,
+    setup_logger,
+    utc_now,
+    write_json,
+    write_text,
+)
 
 
 def main() -> int:
@@ -28,9 +35,17 @@ def main() -> int:
         "git_repo": (root / ".git").exists(),
         "has_commit": run_cmd(["git", "rev-parse", "HEAD"], cwd=root).returncode == 0,
         "remote_configured": bool(run_cmd(["git", "remote"], cwd=root).stdout.strip()),
-        "hooks_installed": all((root / ".git" / "hooks" / name).exists() for name in ["pre-commit", "commit-msg", "pre-push"]),
-        "tests_report_exists": (root / "logs" / "bootstrap" / "phase1_test_report.json").exists(),
-        "working_tree_clean": run_cmd(["git", "status", "--porcelain"], cwd=root).stdout.strip() == "",
+        "hooks_installed": all(
+            (root / ".git" / "hooks" / name).exists()
+            for name in ["pre-commit", "commit-msg", "pre-push"]
+        ),
+        "tests_report_exists": (
+            root / "logs" / "bootstrap" / "phase1_test_report.json"
+        ).exists(),
+        "working_tree_clean": run_cmd(
+            ["git", "status", "--porcelain"], cwd=root
+        ).stdout.strip()
+        == "",
     }
 
     ok = all(checks.values())

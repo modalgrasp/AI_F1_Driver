@@ -21,7 +21,9 @@ def bump(version: str, part: str) -> str:
 def update_version_file(new_version: str) -> None:
     path = Path(__file__)
     text = path.read_text(encoding="utf-8")
-    updated = text.replace(f'__version__ = "{__version__}"', f'__version__ = "{new_version}"')
+    updated = text.replace(
+        f'__version__ = "{__version__}"', f'__version__ = "{new_version}"'
+    )
     path.write_text(updated, encoding="utf-8")
 
 

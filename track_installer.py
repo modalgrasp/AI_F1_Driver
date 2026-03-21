@@ -48,7 +48,11 @@ class TrackInstaller:
 
     def _resolve_ac_root(self) -> Path:
         cfg = self.config.get("assetto_corsa", {})
-        configured = Path(cfg.get("install_path", "")).expanduser() if cfg.get("install_path") else None
+        configured = (
+            Path(cfg.get("install_path", "")).expanduser()
+            if cfg.get("install_path")
+            else None
+        )
         if configured and configured.exists():
             return configured
 
@@ -62,9 +66,13 @@ class TrackInstaller:
             if candidate.exists():
                 return candidate
 
-        raise TrackInstallError("Assetto Corsa install path not found. Set assetto_corsa.install_path in config.")
+        raise TrackInstallError(
+            "Assetto Corsa install path not found. Set assetto_corsa.install_path in config."
+        )
 
-    def install_archive(self, archive_path: Path, track_id: str | None = None) -> dict[str, Any]:
+    def install_archive(
+        self, archive_path: Path, track_id: str | None = None
+    ) -> dict[str, Any]:
         """Install a track archive and return operation report."""
         archive_path = archive_path.resolve()
         if not archive_path.exists():
@@ -87,7 +95,11 @@ class TrackInstaller:
             track_roots = self._detect_track_roots(temp_root)
 
             if track_id:
-                filtered = [root for root in track_roots if self._track_id_matches(track_id, root.name)]
+                filtered = [
+                    root
+                    for root in track_roots
+                    if self._track_id_matches(track_id, root.name)
+                ]
                 if filtered:
                     track_roots = filtered
                 else:
@@ -119,7 +131,9 @@ class TrackInstaller:
             except Exception as exc:
                 LOGGER.exception("Installation failed. Initiating rollback.")
                 self.rollback_from_backup(backup_path)
-                raise TrackInstallError(f"Installation failed and rollback executed: {exc}") from exc
+                raise TrackInstallError(
+                    f"Installation failed and rollback executed: {exc}"
+                ) from exc
 
     def rollback_latest(self) -> None:
         """Rollback from newest backup snapshot."""
@@ -149,7 +163,9 @@ class TrackInstaller:
                     raise TrackInstallError(f"Archive integrity error at file: {bad}")
         elif suffix == ".rar":
             if rarfile is None:
-                raise TrackInstallError("rarfile package not available. Install it to handle .rar archives.")
+                raise TrackInstallError(
+                    "rarfile package not available. Install it to handle .rar archives."
+                )
             with rarfile.RarFile(archive_path, "r") as rf:
                 bad = rf.testrar()
                 if bad is not None:
@@ -222,15 +238,25 @@ class TrackInstaller:
         map_found = False
         ai_found = False
         for layout in layout_dirs:
-            if any((layout / name).exists() for name in ["map.png", "map.jpg", "ui/map.png", "ui/map.jpg"]):
+            if any(
+                (layout / name).exists()
+                for name in ["map.png", "map.jpg", "ui/map.png", "ui/map.jpg"]
+            ):
                 map_found = True
-            if any((layout / name).exists() for name in ["ai/fast_lane.ai", "ai/fast_lane.csv"]):
+            if any(
+                (layout / name).exists()
+                for name in ["ai/fast_lane.ai", "ai/fast_lane.csv"]
+            ):
                 ai_found = True
 
         if not map_found:
-            raise TrackInstallError(f"Track {track_root.name} has no layout map image file.")
+            raise TrackInstallError(
+                f"Track {track_root.name} has no layout map image file."
+            )
         if not ai_found:
-            raise TrackInstallError(f"Track {track_root.name} has no layout AI lane file.")
+            raise TrackInstallError(
+                f"Track {track_root.name} has no layout AI lane file."
+            )
 
     def _detect_layout_dirs(self, track_root: Path) -> list[Path]:
         # Single-layout tracks place data directly in root.
@@ -270,11 +296,23 @@ class TrackInstaller:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Install Assetto Corsa track archives safely.")
-    parser.add_argument("--archive", type=Path, help="Path to .zip or .rar track archive")
-    parser.add_argument("--track-id", type=str, default=None, help="Optional explicit track folder name")
-    parser.add_argument("--config", type=Path, default=Path("configs/config.json"), help="Config path")
-    parser.add_argument("--rollback-latest", action="store_true", help="Rollback using latest backup snapshot")
+    parser = argparse.ArgumentParser(
+        description="Install Assetto Corsa track archives safely."
+    )
+    parser.add_argument(
+        "--archive", type=Path, help="Path to .zip or .rar track archive"
+    )
+    parser.add_argument(
+        "--track-id", type=str, default=None, help="Optional explicit track folder name"
+    )
+    parser.add_argument(
+        "--config", type=Path, default=Path("configs/config.json"), help="Config path"
+    )
+    parser.add_argument(
+        "--rollback-latest",
+        action="store_true",
+        help="Rollback using latest backup snapshot",
+    )
     return parser
 
 
@@ -291,7 +329,9 @@ def main() -> int:
     if args.archive is None:
         raise SystemExit("--archive is required unless --rollback-latest is used")
 
-    report = installer.install_archive(archive_path=args.archive, track_id=args.track_id)
+    report = installer.install_archive(
+        archive_path=args.archive, track_id=args.track_id
+    )
     LOGGER.info("Track installation finished: %s", report)
     return 0
 

@@ -23,9 +23,13 @@ def plot_2d(track_id: str, payload: dict, out_dir: Path) -> None:
     right = np.array(payload["boundaries"]["right"], dtype=np.float64)
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    ax.plot(center[:, 0], center[:, 2], label="Racing Line", color="tab:blue", linewidth=2)
+    ax.plot(
+        center[:, 0], center[:, 2], label="Racing Line", color="tab:blue", linewidth=2
+    )
     ax.plot(left[:, 0], left[:, 2], label="Left Boundary", color="tab:green", alpha=0.7)
-    ax.plot(right[:, 0], right[:, 2], label="Right Boundary", color="tab:red", alpha=0.7)
+    ax.plot(
+        right[:, 0], right[:, 2], label="Right Boundary", color="tab:red", alpha=0.7
+    )
 
     for turn in payload.get("turns", [])[:16]:
         apex = np.array(turn["apex_xyz"], dtype=np.float64)
@@ -63,7 +67,11 @@ def plot_3d(track_id: str, payload: dict, out_dir: Path) -> None:
     )
     fig.update_layout(
         title=f"{track_id} 3D Racing Line",
-        scene={"xaxis_title": "X (m)", "yaxis_title": "Z (m)", "zaxis_title": "Y Elevation (m)"},
+        scene={
+            "xaxis_title": "X (m)",
+            "yaxis_title": "Z (m)",
+            "zaxis_title": "Y Elevation (m)",
+        },
     )
     fig.write_html(out_dir / f"{track_id}_layout_3d.html")
 

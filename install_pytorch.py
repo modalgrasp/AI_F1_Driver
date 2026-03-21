@@ -27,7 +27,13 @@ def run_cmd(command: list[str]) -> tuple[int, str]:
 
 
 def detect_cuda_runtime() -> dict[str, Any]:
-    code, out = run_cmd(["nvidia-smi", "--query-gpu=driver_version,name,memory.total", "--format=csv,noheader"])
+    code, out = run_cmd(
+        [
+            "nvidia-smi",
+            "--query-gpu=driver_version,name,memory.total",
+            "--format=csv,noheader",
+        ]
+    )
     if code != 0:
         return {"available": False, "error": out}
 
@@ -74,7 +80,11 @@ def install_torch(index_url: str, dry_run: bool = False) -> dict[str, Any]:
         return {"status": "dry_run", "command": " ".join(command)}
 
     code, out = run_cmd(command)
-    return {"status": "success" if code == 0 else "failed", "command": " ".join(command), "output": out}
+    return {
+        "status": "success" if code == 0 else "failed",
+        "command": " ".join(command),
+        "output": out,
+    }
 
 
 def torch_verify() -> dict[str, Any]:
@@ -142,23 +152,42 @@ def tflops_benchmark(matrix_size: int = 4096, repeats: int = 10) -> dict[str, An
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install and validate PyTorch CUDA stack")
+    parser = argparse.ArgumentParser(
+        description="Install and validate PyTorch CUDA stack"
+    )
     parser.add_argument("--index-url", default=None)
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--rollback", action="store_true", help="Uninstall torch packages")
-    parser.add_argument("--report", type=Path, default=Path("logs/pytorch_install_report.json"))
+    parser.add_argument(
+        "--rollback", action="store_true", help="Uninstall torch packages"
+    )
+    parser.add_argument(
+        "--report", type=Path, default=Path("logs/pytorch_install_report.json")
+    )
     args = parser.parse_args()
 
     setup_logging(Path("logs"), level="INFO", console=True)
 
     if args.rollback:
-        code, out = run_cmd([sys.executable, "-m", "pip", "uninstall", "-y", "torch", "torchvision", "torchaudio"])
+        code, out = run_cmd(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "uninstall",
+                "-y",
+                "torch",
+                "torchvision",
+                "torchaudio",
+            ]
+        )
         LOGGER.info("Rollback finished with code %d", code)
         print(out)
         return 0 if code == 0 else 1
 
     cuda_info = detect_cuda_runtime()
-    index_url = args.index_url or recommended_index(cuda_info.get("cuda_driver_runtime"))
+    index_url = args.index_url or recommended_index(
+        cuda_info.get("cuda_driver_runtime")
+    )
 
     install_result = install_torch(index_url=index_url, dry_run=args.dry_run)
     verify_result = torch_verify() if not args.dry_run else {"status": "skipped"}
@@ -177,7 +206,10 @@ def main() -> int:
     args.report.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     LOGGER.info("Report written to %s", args.report)
-    if install_result.get("status") == "failed" or verify_result.get("status") == "failed":
+    if (
+        install_result.get("status") == "failed"
+        or verify_result.get("status") == "failed"
+    ):
         return 1
     return 0
 

@@ -3,7 +3,7 @@
 ## Related Issues
 
 ## What Changed
-- 
+-
 
 ## Validation
 - [ ] Unit tests added/updated

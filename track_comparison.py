@@ -25,7 +25,9 @@ def score_track(payload: dict[str, Any]) -> tuple[float, dict[str, float]]:
     score_parts["waypoint_density"] = min(meta.get("waypoint_count", 0) / 2000.0, 1.0)
     score_parts["turn_coverage"] = min(len(turns) / 16.0, 1.0)
     score_parts["surface_defs"] = min(len(surfaces) / 8.0, 1.0)
-    score_parts["boundary_presence"] = 1.0 if boundaries.get("left") and boundaries.get("right") else 0.0
+    score_parts["boundary_presence"] = (
+        1.0 if boundaries.get("left") and boundaries.get("right") else 0.0
+    )
 
     total = float(np.mean(list(score_parts.values())))
     return total, score_parts
@@ -62,8 +64,14 @@ def compare(paths: list[Path]) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Compare extracted track variants")
-    parser.add_argument("paths", nargs="+", type=Path, help="Paths to *_track_data.json files")
-    parser.add_argument("--output", type=Path, default=Path("data/tracks/yas_marina/comparison/track_comparison_report.json"))
+    parser.add_argument(
+        "paths", nargs="+", type=Path, help="Paths to *_track_data.json files"
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("data/tracks/yas_marina/comparison/track_comparison_report.json"),
+    )
     args = parser.parse_args()
 
     report = compare(args.paths)

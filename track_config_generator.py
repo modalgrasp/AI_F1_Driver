@@ -12,7 +12,9 @@ from typing import Any
 from utils.config_manager import ConfigManager
 
 
-def generate_track_config(track_id: str, base_config_path: Path, output_path: Path) -> dict[str, Any]:
+def generate_track_config(
+    track_id: str, base_config_path: Path, output_path: Path
+) -> dict[str, Any]:
     base = ConfigManager(base_config_path).load()
 
     track_cfg: dict[str, Any] = {
@@ -84,7 +86,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate Yas Marina RL config")
     parser.add_argument("--track-id", default="yas_marina")
     parser.add_argument("--base-config", type=Path, default=Path("configs/config.json"))
-    parser.add_argument("--output", type=Path, default=Path("configs/yas_marina_config.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("configs/yas_marina_config.json")
+    )
     args = parser.parse_args()
 
     cfg = generate_track_config(args.track_id, args.base_config, args.output)

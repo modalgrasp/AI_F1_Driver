@@ -47,7 +47,9 @@ def recommend() -> ParallelRecommendation:
 def synthetic_benchmark(env_count: int, steps: int = 1000) -> dict:
     # Simulated throughput benchmark for planning before full simulator multiprocess setup.
     t0 = time.perf_counter()
-    obs = torch.randn((env_count, 256), device="cuda" if torch.cuda.is_available() else "cpu")
+    obs = torch.randn(
+        (env_count, 256), device="cuda" if torch.cuda.is_available() else "cpu"
+    )
     w = torch.randn((256, 256), device=obs.device)
     for _ in range(steps):
         obs = torch.relu(obs @ w)
@@ -63,8 +65,12 @@ def synthetic_benchmark(env_count: int, steps: int = 1000) -> dict:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Parallel environment configuration recommender")
-    parser.add_argument("--output", type=Path, default=Path("logs/parallel_env_recommendation.json"))
+    parser = argparse.ArgumentParser(
+        description="Parallel environment configuration recommender"
+    )
+    parser.add_argument(
+        "--output", type=Path, default=Path("logs/parallel_env_recommendation.json")
+    )
     args = parser.parse_args()
 
     rec = recommend()

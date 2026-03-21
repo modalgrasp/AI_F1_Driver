@@ -16,7 +16,11 @@ def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def advise(batch_report: dict[str, Any], gpu_test_report: dict[str, Any], parallel_report: dict[str, Any]) -> dict[str, Any]:
+def advise(
+    batch_report: dict[str, Any],
+    gpu_test_report: dict[str, Any],
+    parallel_report: dict[str, Any],
+) -> dict[str, Any]:
     recommendations: list[str] = []
     snippets: list[str] = []
 
@@ -25,25 +29,39 @@ def advise(batch_report: dict[str, Any], gpu_test_report: dict[str, Any], parall
     envs = batch_report.get("recommended_parallel_envs", 4)
 
     if batch_size and batch_size < 256:
-        recommendations.append(f"Increase gradient accumulation because optimal batch size is only {batch_size}.")
+        recommendations.append(
+            f"Increase gradient accumulation because optimal batch size is only {batch_size}."
+        )
         snippets.append("gradient_accumulation_steps = 4")
     else:
         recommendations.append(f"Use batch size near {batch_size} for high throughput.")
 
     if sps and sps < 1000:
-        recommendations.append("Training throughput is below 1000 samples/s; enable AMP and raise batch size.")
+        recommendations.append(
+            "Training throughput is below 1000 samples/s; enable AMP and raise batch size."
+        )
     else:
-        recommendations.append("Throughput target is met or close; prioritize thermal stability.")
+        recommendations.append(
+            "Throughput target is met or close; prioritize thermal stability."
+        )
 
     if envs > 0:
-        recommendations.append(f"Set parallel environments around {envs} for balanced CPU/GPU usage.")
+        recommendations.append(
+            f"Set parallel environments around {envs} for balanced CPU/GPU usage."
+        )
 
-    failed_tests = [r for r in gpu_test_report.get("results", []) if not r.get("passed", False)]
+    failed_tests = [
+        r for r in gpu_test_report.get("results", []) if not r.get("passed", False)
+    ]
     for item in failed_tests:
-        recommendations.append(f"Fix failed test: {item.get('name')} -> {item.get('message')}")
+        recommendations.append(
+            f"Fix failed test: {item.get('name')} -> {item.get('message')}"
+        )
 
     recommendations.append("Enable TF32 and cudnn benchmark for speed on fixed shapes.")
-    recommendations.append("Reserve at least 2.5 GB VRAM for simulation while training.")
+    recommendations.append(
+        "Reserve at least 2.5 GB VRAM for simulation while training."
+    )
 
     return {
         "timestamp": datetime.now(UTC).isoformat(),
@@ -57,14 +75,30 @@ def advise(batch_report: dict[str, Any], gpu_test_report: dict[str, Any], parall
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate optimization recommendations")
-    parser.add_argument("--batch-report", type=Path, default=Path("logs/batch_size_recommendation.json"))
-    parser.add_argument("--gpu-test-report", type=Path, default=Path("logs/gpu_test_report.json"))
-    parser.add_argument("--parallel-report", type=Path, default=Path("logs/parallel_env_recommendation.json"))
-    parser.add_argument("--output", type=Path, default=Path("logs/optimization_advice.json"))
+    parser = argparse.ArgumentParser(
+        description="Generate optimization recommendations"
+    )
+    parser.add_argument(
+        "--batch-report", type=Path, default=Path("logs/batch_size_recommendation.json")
+    )
+    parser.add_argument(
+        "--gpu-test-report", type=Path, default=Path("logs/gpu_test_report.json")
+    )
+    parser.add_argument(
+        "--parallel-report",
+        type=Path,
+        default=Path("logs/parallel_env_recommendation.json"),
+    )
+    parser.add_argument(
+        "--output", type=Path, default=Path("logs/optimization_advice.json")
+    )
     args = parser.parse_args()
 
-    advice = advise(read_json(args.batch_report), read_json(args.gpu_test_report), read_json(args.parallel_report))
+    advice = advise(
+        read_json(args.batch_report),
+        read_json(args.gpu_test_report),
+        read_json(args.parallel_report),
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(advice, indent=2), encoding="utf-8")
     print(json.dumps(advice, indent=2))

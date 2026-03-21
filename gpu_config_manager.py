@@ -59,7 +59,9 @@ class GPUConfigManager:
         driver = None
         runtime = None
         try:
-            out = subprocess.run(["nvidia-smi"], capture_output=True, text=True, check=False).stdout
+            out = subprocess.run(
+                ["nvidia-smi"], capture_output=True, text=True, check=False
+            ).stdout
             for line in out.splitlines():
                 if "Driver Version:" in line and "CUDA Version:" in line:
                     driver = line.split("Driver Version:", 1)[1].split()[0]
@@ -98,12 +100,20 @@ class GPUConfigManager:
 
     def allocation_strategy(self) -> dict[str, float]:
         if not torch.cuda.is_available():
-            return {"simulation_gb": 0.0, "training_gb": 0.0, "buffer_gb": 0.0, "total_gb": 0.0}
+            return {
+                "simulation_gb": 0.0,
+                "training_gb": 0.0,
+                "buffer_gb": 0.0,
+                "total_gb": 0.0,
+            }
 
         total = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         sim = float(self.config.get("simulation_vram_reserve_gb", 2.5))
         buffer = float(self.config.get("system_buffer_gb", 2.0))
-        train = min(float(self.config.get("training_vram_target_gb", 7.0)), max(0.0, total - sim - buffer))
+        train = min(
+            float(self.config.get("training_vram_target_gb", 7.0)),
+            max(0.0, total - sim - buffer),
+        )
         return {
             "simulation_gb": round(sim, 2),
             "training_gb": round(train, 2),
@@ -118,7 +128,9 @@ class GPUConfigManager:
         return {
             "allocated_gb": round(torch.cuda.memory_allocated(idx) / (1024**3), 3),
             "reserved_gb": round(torch.cuda.memory_reserved(idx) / (1024**3), 3),
-            "max_allocated_gb": round(torch.cuda.max_memory_allocated(idx) / (1024**3), 3),
+            "max_allocated_gb": round(
+                torch.cuda.max_memory_allocated(idx) / (1024**3), 3
+            ),
         }
 
     def clear_cache(self) -> None:
@@ -129,8 +141,12 @@ class GPUConfigManager:
     def leak_snapshot(self, device: str = "cuda:0") -> dict[str, float]:
         return self.memory_stats(device)
 
-    def compare_snapshots(self, before: dict[str, float], after: dict[str, float]) -> dict[str, float]:
-        return {key: round(after.get(key, 0.0) - before.get(key, 0.0), 4) for key in before}
+    def compare_snapshots(
+        self, before: dict[str, float], after: dict[str, float]
+    ) -> dict[str, float]:
+        return {
+            key: round(after.get(key, 0.0) - before.get(key, 0.0), 4) for key in before
+        }
 
     def export_inventory(self, output: str | Path = "logs/gpu_inventory.json") -> Path:
         out = Path(output)

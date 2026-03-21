@@ -21,14 +21,18 @@ class TensorboardLogger:
     def __init__(self, log_dir: str | Path = "logs/tensorboard") -> None:
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
-        self.writer = SummaryWriter(str(self.log_dir)) if SummaryWriter is not None else None
+        self.writer = (
+            SummaryWriter(str(self.log_dir)) if SummaryWriter is not None else None
+        )
         self.fallback_file = self.log_dir / "tensorboard_fallback.jsonl"
 
     def _fallback_write(self, payload: dict[str, Any]) -> None:
         with self.fallback_file.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(payload) + "\n")
 
-    def log_train_metrics(self, step: int, loss: float, reward: float, episode_len: int, lr: float) -> None:
+    def log_train_metrics(
+        self, step: int, loss: float, reward: float, episode_len: int, lr: float
+    ) -> None:
         payload = {
             "timestamp": datetime.now(UTC).isoformat(),
             "step": step,
@@ -45,7 +49,9 @@ class TensorboardLogger:
         else:
             self._fallback_write({"type": "train", **payload})
 
-    def log_gpu_metrics(self, step: int, gpu_util: float, vram_gb: float, temp_c: float) -> None:
+    def log_gpu_metrics(
+        self, step: int, gpu_util: float, vram_gb: float, temp_c: float
+    ) -> None:
         payload = {
             "timestamp": datetime.now(UTC).isoformat(),
             "step": step,
@@ -64,7 +70,9 @@ class TensorboardLogger:
         if self.writer is not None:
             self.writer.add_hparams(params, metrics)
         else:
-            self._fallback_write({"type": "hparams", "params": params, "metrics": metrics})
+            self._fallback_write(
+                {"type": "hparams", "params": params, "metrics": metrics}
+            )
 
     def close(self) -> None:
         if self.writer is not None:

@@ -40,7 +40,9 @@ def classify_segments(radius: np.ndarray) -> list[str]:
     return labels
 
 
-def theoretical_speed_kmh(curvature: np.ndarray, grip: float = 1.9, downforce_factor: float = 1.25) -> np.ndarray:
+def theoretical_speed_kmh(
+    curvature: np.ndarray, grip: float = 1.9, downforce_factor: float = 1.25
+) -> np.ndarray:
     """Compute simple lateral-limit based speed estimate.
 
     v = sqrt(a_lat / curvature) where a_lat approx grip * g * downforce_factor.
@@ -66,7 +68,9 @@ def gear_hint(speed_kmh: np.ndarray) -> np.ndarray:
     return np.clip(gears, 1, 8)
 
 
-def sector_estimates(distance_m: np.ndarray, speed_kmh: np.ndarray, sectors: np.ndarray) -> dict[int, float]:
+def sector_estimates(
+    distance_m: np.ndarray, speed_kmh: np.ndarray, sectors: np.ndarray
+) -> dict[int, float]:
     speed_mps = np.maximum(speed_kmh / 3.6, 1.0)
     ds = np.diff(distance_m, prepend=distance_m[0])
     dt = ds / speed_mps
@@ -88,7 +92,9 @@ def run_analysis(track_id: str) -> dict[str, Any]:
     raw_curvature = compute_curvature(xyz[:, 0], xyz[:, 2])
     window = min(len(raw_curvature) - (len(raw_curvature) + 1) % 2, 41)
     window = max(window, 5)
-    smooth_curvature = savgol_filter(raw_curvature, window_length=window, polyorder=3, mode="interp")
+    smooth_curvature = savgol_filter(
+        raw_curvature, window_length=window, polyorder=3, mode="interp"
+    )
 
     radius = 1.0 / np.maximum(smooth_curvature, 1e-5)
     segment_types = classify_segments(radius)
@@ -114,10 +120,12 @@ def run_analysis(track_id: str) -> dict[str, Any]:
         "sector_time_estimates_s": sector_times,
         "lap_time_estimate_s": lap_estimate,
         "energy_deployment_opportunities": [
-            {"index": int(i), "type": "deploy"} for i in accel_idx[:: max(1, len(accel_idx) // 12)]
+            {"index": int(i), "type": "deploy"}
+            for i in accel_idx[:: max(1, len(accel_idx) // 12)]
         ],
         "energy_harvest_zones": [
-            {"index": int(i), "type": "harvest"} for i in braking_idx[:: max(1, len(braking_idx) // 12)]
+            {"index": int(i), "type": "harvest"}
+            for i in braking_idx[:: max(1, len(braking_idx) // 12)]
         ],
         "benchmark_comparison": {
             "benchmark_lap_s": 82.109,
@@ -127,12 +135,16 @@ def run_analysis(track_id: str) -> dict[str, Any]:
 
     out_dir = Path("data/tracks") / track_id / "analysis"
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / f"{track_id}_analysis.json").write_text(json.dumps(analysis, indent=2), encoding="utf-8")
+    (out_dir / f"{track_id}_analysis.json").write_text(
+        json.dumps(analysis, indent=2), encoding="utf-8"
+    )
     return analysis
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Analyze extracted racing line and track geometry.")
+    parser = argparse.ArgumentParser(
+        description="Analyze extracted racing line and track geometry."
+    )
     parser.add_argument("--track-id", default="yas_marina")
     args = parser.parse_args()
     result = run_analysis(args.track_id)

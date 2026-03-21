@@ -12,7 +12,10 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
-from environments.assetto_corsa_connector import AssettoCorsaConnectorError, AssettoCorsa_Connector
+from environments.assetto_corsa_connector import (
+    AssettoCorsa_Connector,
+    AssettoCorsaConnectorError,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -130,9 +133,14 @@ class F1RacingEnv(gym.Env[np.ndarray, np.ndarray]):
             self.connector.validate_installation()
             self.connector.connect_shared_memory()
         except AssettoCorsaConnectorError as exc:
-            LOGGER.warning("Live AC connection not available. Falling back to safe telemetry: %s", exc)
+            LOGGER.warning(
+                "Live AC connection not available. Falling back to safe telemetry: %s",
+                exc,
+            )
 
-    def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[np.ndarray, dict[str, Any]]:
+    def reset(
+        self, *, seed: int | None = None, options: dict[str, Any] | None = None
+    ) -> tuple[np.ndarray, dict[str, Any]]:
         """Reset environment to episode start state."""
         super().reset(seed=seed)
         if seed is not None:
@@ -155,7 +163,9 @@ class F1RacingEnv(gym.Env[np.ndarray, np.ndarray]):
         LOGGER.info("Episode %d reset complete.", self.stats.episode_index)
         return obs, info
 
-    def step(self, action: np.ndarray) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+    def step(
+        self, action: np.ndarray
+    ) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         """Run one control step with reward/termination evaluation."""
         t0 = time.perf_counter()
         steer, throttle, brake, gear_delta = self._decode_action(action)
@@ -264,7 +274,9 @@ class F1RacingEnv(gym.Env[np.ndarray, np.ndarray]):
 
         # Approximate racing-line bonus from centerline distance.
         center_distance = abs(float(state["track_center_distance"]))
-        reward += self.rewards_cfg["racing_line_bonus"] * max(0.0, 1.0 - center_distance / 2.0)
+        reward += self.rewards_cfg["racing_line_bonus"] * max(
+            0.0, 1.0 - center_distance / 2.0
+        )
         return float(reward)
 
     def _check_termination(self, state: dict[str, Any]) -> tuple[bool, str]:
@@ -274,7 +286,9 @@ class F1RacingEnv(gym.Env[np.ndarray, np.ndarray]):
         ):
             return True, "collision"
 
-        off_track_seconds = self.stats.off_track_steps / max(1.0, self.config["physics"]["simulation_rate_hz"])
+        off_track_seconds = self.stats.off_track_steps / max(
+            1.0, self.config["physics"]["simulation_rate_hz"]
+        )
         if off_track_seconds >= float(self.thresholds["off_track_seconds"]):
             return True, "off_track_timeout"
 

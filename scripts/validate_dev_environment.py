@@ -14,8 +14,14 @@ from typing import Any
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.bootstrap_common import repo_root, run_cmd, setup_logger, utc_now, write_json, write_text
-
+from scripts.bootstrap_common import (
+    repo_root,
+    run_cmd,
+    setup_logger,
+    utc_now,
+    write_json,
+    write_text,
+)
 
 TOOLS = ["git", "python", "pip", "nvidia-smi", "pre-commit", "pytest"]
 
@@ -82,7 +88,10 @@ def main() -> int:
         "git": git_config(root),
         "ide": ide_state(root),
         "python": python_env_state(),
-        "workspace_clean": run_cmd(["git", "status", "--porcelain"], cwd=root).stdout.strip() == "",
+        "workspace_clean": run_cmd(
+            ["git", "status", "--porcelain"], cwd=root
+        ).stdout.strip()
+        == "",
     }
     guide = write_onboarding(root)
     report["onboarding_guide"] = str(guide)

@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import platform
 import shutil
-import importlib
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
@@ -28,7 +28,9 @@ except Exception:  # pragma: no cover - optional diagnostics
     GPUtil = None
 
 
-def setup_logging(log_dir: str | Path, level: str = "INFO", console: bool = True) -> logging.Logger:
+def setup_logging(
+    log_dir: str | Path, level: str = "INFO", console: bool = True
+) -> logging.Logger:
     """Configure application-wide logging handlers.
 
     Args:

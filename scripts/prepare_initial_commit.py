@@ -39,7 +39,6 @@ from scripts.bootstrap_common import (
     write_text,
 )
 
-
 SENSITIVE_PATTERNS = [
     re.compile(r"AKIA[0-9A-Z]{16}"),
     re.compile(r"(?i)api[_-]?key\s*[:=]\s*['\"][A-Za-z0-9_\-]{16,}['\"]"),
@@ -117,11 +116,24 @@ def categorize(rel_path: str) -> str:
         return "documentation"
     if rel_path.startswith("tests/") or rel_path.startswith("test"):
         return "tests"
-    if rel_path.startswith("configs/") or rel_path.endswith((".json", ".yaml", ".yml", ".toml", ".ini")):
+    if rel_path.startswith("configs/") or rel_path.endswith(
+        (".json", ".yaml", ".yml", ".toml", ".ini")
+    ):
         return "configuration"
     if rel_path.startswith("scripts/"):
         return "scripts"
-    if rel_path.startswith(("utils/", "environments/", "models/", "training/", "control/", "planning/", "perception/", "vehicle_dynamics/")):
+    if rel_path.startswith(
+        (
+            "utils/",
+            "environments/",
+            "models/",
+            "training/",
+            "control/",
+            "planning/",
+            "perception/",
+            "vehicle_dynamics/",
+        )
+    ):
         return "source"
     if rel_path.startswith(".github/"):
         return "ci"
@@ -199,7 +211,13 @@ def scan_repository(root: Path, logger) -> dict[str, Any]:
                 for pattern in SENSITIVE_PATTERNS:
                     match = pattern.search(text)
                     if match:
-                        sensitive_hits.append({"file": rel, "pattern": pattern.pattern, "sample": match.group(0)[:80]})
+                        sensitive_hits.append(
+                            {
+                                "file": rel,
+                                "pattern": pattern.pattern,
+                                "sample": match.group(0)[:80],
+                            }
+                        )
 
     category_counts = Counter(item.category for item in include_items)
     total_size = sum(item.size_bytes for item in include_items)
@@ -218,7 +236,9 @@ def scan_repository(root: Path, logger) -> dict[str, Any]:
             if not python_header_ok(root / item.path):
                 py_header_missing.append(item.path)
     if py_header_missing:
-        warnings.append(f"Python header/docstring missing in {len(py_header_missing)} files")
+        warnings.append(
+            f"Python header/docstring missing in {len(py_header_missing)} files"
+        )
 
     grouped = defaultdict(list)
     for item in include_items:
@@ -250,7 +270,9 @@ def scan_repository(root: Path, logger) -> dict[str, Any]:
         },
         "manifest": dict(grouped),
     }
-    logger.info("Prepared manifest: %d files, %s", len(include_items), human_size(total_size))
+    logger.info(
+        "Prepared manifest: %d files, %s", len(include_items), human_size(total_size)
+    )
     return report
 
 
@@ -291,16 +313,22 @@ def apply_exclusions(report: dict[str, Any], exclusions: set[str]) -> dict[str, 
 
     updated_manifest: dict[str, list[dict[str, Any]]] = {}
     for category, items in report["manifest"].items():
-        updated_manifest[category] = [item for item in items if item["path"] not in exclusions]
+        updated_manifest[category] = [
+            item for item in items if item["path"] not in exclusions
+        ]
 
     total_files = sum(len(items) for items in updated_manifest.values())
-    total_size = sum(item["size_bytes"] for items in updated_manifest.values() for item in items)
+    total_size = sum(
+        item["size_bytes"] for items in updated_manifest.values() for item in items
+    )
 
     report["manifest"] = updated_manifest
     report["summary"]["total_files"] = total_files
     report["summary"]["total_size_bytes"] = total_size
     report["summary"]["total_size_human"] = human_size(total_size)
-    report["issues"]["warnings"].append(f"User excluded {len(exclusions)} files in interactive mode")
+    report["issues"]["warnings"].append(
+        f"User excluded {len(exclusions)} files in interactive mode"
+    )
     report["interactive_exclusions"] = sorted(exclusions)
     return report
 
@@ -311,27 +339,47 @@ def generate_checklist(report: dict[str, Any]) -> list[dict[str, Any]]:
         {
             "name": "Required files present",
             "ok": len(issues["missing_required"]) == 0,
-            "detail": "All required files found" if not issues["missing_required"] else ", ".join(issues["missing_required"]),
+            "detail": (
+                "All required files found"
+                if not issues["missing_required"]
+                else ", ".join(issues["missing_required"])
+            ),
         },
         {
             "name": "No sensitive data detected",
             "ok": len(issues["sensitive_hits"]) == 0,
-            "detail": "No key/password patterns found" if not issues["sensitive_hits"] else f"{len(issues['sensitive_hits'])} potential hits",
+            "detail": (
+                "No key/password patterns found"
+                if not issues["sensitive_hits"]
+                else f"{len(issues['sensitive_hits'])} potential hits"
+            ),
         },
         {
             "name": "No generated artifacts staged",
             "ok": len(issues["should_be_ignored_but_not"]) == 0,
-            "detail": "Gitignore patterns effective" if not issues["should_be_ignored_but_not"] else f"{len(issues['should_be_ignored_but_not'])} files need ignore rules",
+            "detail": (
+                "Gitignore patterns effective"
+                if not issues["should_be_ignored_but_not"]
+                else f"{len(issues['should_be_ignored_but_not'])} files need ignore rules"
+            ),
         },
         {
             "name": "Python package init files",
             "ok": len(issues["missing_inits"]) == 0,
-            "detail": "All package directories contain __init__.py" if not issues["missing_inits"] else f"Missing in {len(issues['missing_inits'])} directories",
+            "detail": (
+                "All package directories contain __init__.py"
+                if not issues["missing_inits"]
+                else f"Missing in {len(issues['missing_inits'])} directories"
+            ),
         },
         {
             "name": "Python header/docstring check",
             "ok": len(issues["python_header_missing"]) == 0,
-            "detail": "All Python files contain header/docstring" if not issues["python_header_missing"] else f"{len(issues['python_header_missing'])} files need review",
+            "detail": (
+                "All Python files contain header/docstring"
+                if not issues["python_header_missing"]
+                else f"{len(issues['python_header_missing'])} files need review"
+            ),
         },
         {
             "name": "Large file check",
@@ -342,7 +390,13 @@ def generate_checklist(report: dict[str, Any]) -> list[dict[str, Any]]:
     return checks
 
 
-def save_reports(root: Path, report: dict[str, Any], checklist: list[dict[str, Any]], output_dir: Path, logger) -> None:
+def save_reports(
+    root: Path,
+    report: dict[str, Any],
+    checklist: list[dict[str, Any]],
+    output_dir: Path,
+    logger,
+) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     report_path = output_dir / "initial_commit_manifest.json"
     checklist_path = output_dir / "pre_commit_checklist.json"
@@ -398,15 +452,25 @@ def prepare_repository(
     save_reports(root, report, checklist, out_dir, logger)
 
     if dry_run:
-        logger.info("Dry-run mode enabled: no staging or commit actions were performed.")
+        logger.info(
+            "Dry-run mode enabled: no staging or commit actions were performed."
+        )
 
     return report, checklist
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Prepare repository files for initial commit")
-    parser.add_argument("--dry-run", action="store_true", help="Preview only; do not modify repository")
-    parser.add_argument("--interactive", action="store_true", help="Interactive review and manual exclusions")
+    parser = argparse.ArgumentParser(
+        description="Prepare repository files for initial commit"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview only; do not modify repository"
+    )
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Interactive review and manual exclusions",
+    )
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -427,7 +491,9 @@ def main() -> int:
     if report["issues"]["missing_required"]:
         critical += 1
 
-    print(json.dumps({"summary": report["summary"], "checklist": checklist[:6]}, indent=2))
+    print(
+        json.dumps({"summary": report["summary"], "checklist": checklist[:6]}, indent=2)
+    )
     return 1 if critical else 0
 
 

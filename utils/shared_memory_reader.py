@@ -76,7 +76,9 @@ class SharedMemoryReader:
         self._lock = threading.Lock()
         self._running = False
         self._thread: threading.Thread | None = None
-        self._cache: deque[SharedMemoryFrame] = deque(maxlen=2 if self._use_double_buffer else 1)
+        self._cache: deque[SharedMemoryFrame] = deque(
+            maxlen=2 if self._use_double_buffer else 1
+        )
         self._mappings: dict[str, mmap.mmap] = {}
 
     def start(self) -> None:
@@ -87,7 +89,9 @@ class SharedMemoryReader:
 
         self._open_mappings()
         self._running = True
-        self._thread = threading.Thread(target=self._poll_loop, daemon=True, name="ac-shmem-poller")
+        self._thread = threading.Thread(
+            target=self._poll_loop, daemon=True, name="ac-shmem-poller"
+        )
         self._thread.start()
         LOGGER.info("Shared memory polling started at %d Hz.", self.polling_hz)
 
@@ -119,7 +123,9 @@ class SharedMemoryReader:
             SharedMemoryUnavailableError: If no telemetry segments can be opened.
         """
         if os.name != "nt":
-            LOGGER.warning("Native mmap telemetry mapping currently implemented for Windows only.")
+            LOGGER.warning(
+                "Native mmap telemetry mapping currently implemented for Windows only."
+            )
             return
 
         opened = 0
@@ -129,7 +135,9 @@ class SharedMemoryReader:
                     mapping = mmap.mmap(-1, 4096, tagname=name, access=mmap.ACCESS_READ)
                     self._mappings[key] = mapping
                     opened += 1
-                    LOGGER.info("Opened shared memory segment '%s' for key '%s'.", name, key)
+                    LOGGER.info(
+                        "Opened shared memory segment '%s' for key '%s'.", name, key
+                    )
                     break
                 except FileNotFoundError:
                     continue
@@ -198,7 +206,9 @@ class SharedMemoryReader:
             )
             return self._sanitize_frame(frame)
         except Exception:
-            LOGGER.exception("Shared memory frame read failed. Returning fallback frame.")
+            LOGGER.exception(
+                "Shared memory frame read failed. Returning fallback frame."
+            )
             return self._fallback_frame()
 
     def _sanitize_frame(self, frame: SharedMemoryFrame) -> SharedMemoryFrame:

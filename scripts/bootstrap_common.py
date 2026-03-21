@@ -46,7 +46,9 @@ def ensure_dir(path: Path) -> Path:
     return path
 
 
-def setup_logger(name: str, log_dir: Path | None = None, level: int = logging.INFO) -> logging.Logger:
+def setup_logger(
+    name: str, log_dir: Path | None = None, level: int = logging.INFO
+) -> logging.Logger:
     """Configure logger with console + file outputs.
 
     Logs are written under logs/bootstrap by default.
@@ -156,7 +158,9 @@ def has_tty() -> bool:
 
 def current_branch(root: Path | None = None) -> str:
     """Resolve current Git branch, fallback to main."""
-    result = run_cmd(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=root or repo_root())
+    result = run_cmd(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=root or repo_root()
+    )
     if result.returncode != 0 or not result.stdout:
         return "main"
     return result.stdout
@@ -189,11 +193,15 @@ def gitpython_repo(root: Path | None = None):
     try:
         from git import Repo  # type: ignore
     except Exception as exc:
-        raise RuntimeError("GitPython is required. Install with: pip install GitPython") from exc
+        raise RuntimeError(
+            "GitPython is required. Install with: pip install GitPython"
+        ) from exc
     return Repo(str(root or repo_root()))
 
 
-def copytree_filtered(source: Path, destination: Path, ignore: shutil.IgnorePattern | None = None) -> None:
+def copytree_filtered(
+    source: Path, destination: Path, ignore: shutil.IgnorePattern | None = None
+) -> None:
     """Copy directory tree with overwrite behavior."""
     if destination.exists():
         shutil.rmtree(destination)

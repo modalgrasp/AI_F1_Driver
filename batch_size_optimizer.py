@@ -13,7 +13,9 @@ from typing import Any
 import torch
 
 
-def training_trial(batch_size: int, feature_dim: int = 512, hidden: int = 1024) -> tuple[float, float]:
+def training_trial(
+    batch_size: int, feature_dim: int = 512, hidden: int = 1024
+) -> tuple[float, float]:
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA unavailable")
 
@@ -42,11 +44,15 @@ def training_trial(batch_size: int, feature_dim: int = 512, hidden: int = 1024) 
     dt = time.perf_counter() - t0
 
     samples_per_sec = (batch_size * 10) / max(dt, 1e-9)
-    mem_pct = torch.cuda.memory_reserved(0) / torch.cuda.get_device_properties(0).total_memory
+    mem_pct = (
+        torch.cuda.memory_reserved(0) / torch.cuda.get_device_properties(0).total_memory
+    )
     return samples_per_sec, mem_pct
 
 
-def optimize(min_bs: int, max_bs: int, target_low: float, target_high: float) -> dict[str, Any]:
+def optimize(
+    min_bs: int, max_bs: int, target_low: float, target_high: float
+) -> dict[str, Any]:
     best = min_bs
     best_samples = 0.0
     fallback_best = min_bs
@@ -91,12 +97,16 @@ def optimize(min_bs: int, max_bs: int, target_low: float, target_high: float) ->
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Batch size optimizer for CUDA training")
+    parser = argparse.ArgumentParser(
+        description="Batch size optimizer for CUDA training"
+    )
     parser.add_argument("--min-batch", type=int, default=32)
     parser.add_argument("--max-batch", type=int, default=8192)
     parser.add_argument("--target-low", type=float, default=0.80)
     parser.add_argument("--target-high", type=float, default=0.95)
-    parser.add_argument("--output", type=Path, default=Path("logs/batch_size_recommendation.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("logs/batch_size_recommendation.json")
+    )
     args = parser.parse_args()
 
     result = optimize(args.min_batch, args.max_batch, args.target_low, args.target_high)

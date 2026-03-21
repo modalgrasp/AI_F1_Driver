@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -28,7 +28,13 @@ class ExperimentManager:
         self.template = self.experiments / "experiment_template"
 
     def _git_commit(self) -> str:
-        proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.root, text=True, capture_output=True, check=False)
+        proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
         return proc.stdout.strip() if proc.returncode == 0 else "unknown"
 
     def create_experiment(self, seed: int = 42) -> Path:
@@ -48,15 +54,23 @@ class ExperimentManager:
             seed=seed,
             hardware={},
         )
-        (target / "metadata.json").write_text(json.dumps(asdict(meta), indent=2), encoding="utf-8")
-        (target / "README.md").write_text("# Experiment\n\nTODO: describe hypothesis and settings.\n", encoding="utf-8")
+        (target / "metadata.json").write_text(
+            json.dumps(asdict(meta), indent=2), encoding="utf-8"
+        )
+        (target / "README.md").write_text(
+            "# Experiment\n\nTODO: describe hypothesis and settings.\n",
+            encoding="utf-8",
+        )
         return target
 
     def log_metrics(self, experiment_path: Path, metrics: dict[str, Any]) -> None:
         metrics_file = experiment_path / "results" / "metrics.jsonl"
         metrics_file.parent.mkdir(parents=True, exist_ok=True)
         with metrics_file.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"timestamp": datetime.now(UTC).isoformat(), **metrics}) + "\n")
+            fh.write(
+                json.dumps({"timestamp": datetime.now(UTC).isoformat(), **metrics})
+                + "\n"
+            )
 
     def compare_experiments(self, experiment_ids: list[str]) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
@@ -64,7 +78,11 @@ class ExperimentManager:
             path = self.experiments / exp / "results" / "metrics.jsonl"
             if not path.exists():
                 continue
-            lines = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            lines = [
+                json.loads(line)
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
             if lines:
                 rows.append({"experiment": exp, "latest": lines[-1]})
         return rows

@@ -56,7 +56,9 @@ def test_memory_allocation() -> TestResult:
         t2 = torch.empty((2048, 2048, 4), device="cuda")
         del t1, t2
         torch.cuda.empty_cache()
-        return TestResult("memory_allocation", True, "allocation and release successful")
+        return TestResult(
+            "memory_allocation", True, "allocation and release successful"
+        )
     except RuntimeError as exc:
         return TestResult("memory_allocation", False, str(exc))
 
@@ -64,11 +66,17 @@ def test_memory_allocation() -> TestResult:
 def test_mixed_precision() -> TestResult:
     if not torch.cuda.is_available():
         return TestResult("mixed_precision", False, "CUDA unavailable")
-    model = torch.nn.Sequential(torch.nn.Linear(256, 512), torch.nn.ReLU(), torch.nn.Linear(512, 64))
+    model = torch.nn.Sequential(
+        torch.nn.Linear(256, 512), torch.nn.ReLU(), torch.nn.Linear(512, 64)
+    )
     amp = MixedPrecisionManager(enabled=True, dtype="float16")
     metrics = amp.benchmark_wrapper(model, (256, 256), steps=20)
     ok = metrics.iter_per_sec > 0
-    return TestResult("mixed_precision", ok, f"iter_per_sec={metrics.iter_per_sec:.2f}, peak_gb={metrics.peak_memory_gb:.2f}")
+    return TestResult(
+        "mixed_precision",
+        ok,
+        f"iter_per_sec={metrics.iter_per_sec:.2f}, peak_gb={metrics.peak_memory_gb:.2f}",
+    )
 
 
 def test_multi_env_simulation() -> TestResult:
@@ -81,7 +89,9 @@ def test_multi_env_simulation() -> TestResult:
     for _ in range(100):
         obs = torch.tanh(obs @ w)
     torch.cuda.synchronize()
-    return TestResult("multi_env_simulation", True, "simulated parallel env workload passed")
+    return TestResult(
+        "multi_env_simulation", True, "simulated parallel env workload passed"
+    )
 
 
 def test_perf_benchmark() -> TestResult:
@@ -111,7 +121,9 @@ def test_thermal_stability(duration_sec: int) -> TestResult:
     while time.time() < end:
         _ = a @ b
     torch.cuda.synchronize()
-    return TestResult("thermal_stability", True, f"stress run completed for {duration_sec}s")
+    return TestResult(
+        "thermal_stability", True, f"stress run completed for {duration_sec}s"
+    )
 
 
 def run_suite(quick: bool) -> dict:
@@ -145,7 +157,9 @@ def run_suite(quick: bool) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description="GPU setup validation suite")
     parser.add_argument("--quick", action="store_true")
-    parser.add_argument("--output", type=Path, default=Path("logs/gpu_test_report.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("logs/gpu_test_report.json")
+    )
     args = parser.parse_args()
 
     report = run_suite(quick=args.quick)

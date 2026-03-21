@@ -32,7 +32,6 @@ from scripts.bootstrap_common import (
 )
 from scripts.prepare_initial_commit import prepare_repository
 
-
 COMMIT_TEMPLATE = """chore: initial project setup for F1 Autonomous Racing AI
 
 Set up complete project structure for autonomous F1 racing agent development.
@@ -107,7 +106,11 @@ def collect_group_files(root: Path, files: set[str], patterns: list[str]) -> lis
             out.update(file for file in files if file.startswith(prefix))
             continue
         if "*" in pattern:
-            out.update(path.relative_to(root).as_posix() for path in root.glob(pattern) if path.is_file())
+            out.update(
+                path.relative_to(root).as_posix()
+                for path in root.glob(pattern)
+                if path.is_file()
+            )
             continue
         if (root / pattern).is_file() and pattern in files:
             out.add(pattern)
@@ -117,7 +120,9 @@ def collect_group_files(root: Path, files: set[str], patterns: list[str]) -> lis
 def ensure_git_clean_for_initial(repo, logger) -> None:
     status = repo.git.status("--porcelain")
     if "UU " in status:
-        raise RuntimeError("Merge conflicts detected. Resolve conflicts before initial commit.")
+        raise RuntimeError(
+            "Merge conflicts detected. Resolve conflicts before initial commit."
+        )
     # Allow untracked files; this is expected for initial bootstrap.
     logger.info("Git status check completed.")
 
@@ -152,9 +157,13 @@ def stage_by_groups(repo, root: Path, all_files: set[str], logger) -> dict[str, 
     return counts
 
 
-def commit_with_message(repo, message: str, sign: bool, logger, no_verify: bool = True) -> str:
+def commit_with_message(
+    repo, message: str, sign: bool, logger, no_verify: bool = True
+) -> str:
     if sign:
-        with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as temp:
+        with tempfile.NamedTemporaryFile(
+            "w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as temp:
             temp.write(message)
             temp_path = temp.name
         cmd = ["git", "commit", "-S", "-F", temp_path]
@@ -164,13 +173,22 @@ def commit_with_message(repo, message: str, sign: bool, logger, no_verify: bool 
         if result.returncode != 0:
             if no_verify and "hook" in (result.stderr + result.stdout).lower():
                 # Fallback retry in case signing + no-verify still fails due local hook policy.
-                retry = run_cmd(["git", "commit", "-S", "-F", temp_path, "--no-verify"], cwd=repo_root())
+                retry = run_cmd(
+                    ["git", "commit", "-S", "-F", temp_path, "--no-verify"],
+                    cwd=repo_root(),
+                )
                 if retry.returncode == 0:
-                    logger.warning("Commit succeeded after hook-fallback retry with --no-verify.")
+                    logger.warning(
+                        "Commit succeeded after hook-fallback retry with --no-verify."
+                    )
                     return repo.head.commit.hexsha
-            raise RuntimeError(f"Signed commit failed: {result.stderr or result.stdout}")
+            raise RuntimeError(
+                f"Signed commit failed: {result.stderr or result.stdout}"
+            )
     else:
-        with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as temp:
+        with tempfile.NamedTemporaryFile(
+            "w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as temp:
             temp.write(message)
             temp_path = temp.name
         cmd = ["git", "commit", "-F", temp_path]
@@ -188,7 +206,10 @@ def create_tag(repo, tag_name: str, message: str, sign: bool, logger) -> str:
     if sign:
         args.insert(1, "-s")
     result = run_cmd(["git", *args], cwd=repo_root())
-    if result.returncode != 0 and "already exists" not in (result.stderr + result.stdout).lower():
+    if (
+        result.returncode != 0
+        and "already exists" not in (result.stderr + result.stdout).lower()
+    ):
         raise RuntimeError(f"Tag creation failed: {result.stderr or result.stdout}")
     logger.info("Tag ready: %s", tag_name)
     return tag_name
@@ -211,12 +232,20 @@ def run_create_initial_commit(
     prep_report = None
     prep_checklist = None
     if not skip_prepare:
-        prep_report, prep_checklist = prepare_repository(dry_run=dry_run, interactive=interactive)
+        prep_report, prep_checklist = prepare_repository(
+            dry_run=dry_run, interactive=interactive
+        )
 
     if has_commits(repo):
-        logger.warning("Repository already has commits; script will create additional commit if staged changes exist.")
+        logger.warning(
+            "Repository already has commits; script will create additional commit if staged changes exist."
+        )
 
-    manifest = prep_report["manifest"] if prep_report else {"all": [{"path": p} for p in repo.untracked_files]}
+    manifest = (
+        prep_report["manifest"]
+        if prep_report
+        else {"all": [{"path": p} for p in repo.untracked_files]}
+    )
     files = set(manifest_files(manifest))
 
     stage_counts = {}
@@ -226,11 +255,17 @@ def run_create_initial_commit(
         try:
             stage_counts = stage_by_groups(repo, root, files, logger)
             if not repo.git.diff("--cached", "--name-only").strip():
-                logger.info("No new files staged; using existing HEAD commit for idempotent success.")
+                logger.info(
+                    "No new files staged; using existing HEAD commit for idempotent success."
+                )
                 commit_hash = repo.head.commit.hexsha
             else:
-                message = COMMIT_TEMPLATE.format(user_name=user_name, user_email=user_email)
-                commit_hash = commit_with_message(repo, message, sign=sign, logger=logger)
+                message = COMMIT_TEMPLATE.format(
+                    user_name=user_name, user_email=user_email
+                )
+                commit_hash = commit_with_message(
+                    repo, message, sign=sign, logger=logger
+                )
 
             tag_name = create_tag(
                 repo,
@@ -265,13 +300,21 @@ def run_create_initial_commit(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create initial Phase 1 bootstrap commit")
+    parser = argparse.ArgumentParser(
+        description="Create initial Phase 1 bootstrap commit"
+    )
     parser.add_argument("--user-name", default="USER_NAME_PLACEHOLDER")
     parser.add_argument("--user-email", default="USER_EMAIL_PLACEHOLDER")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interactive", action="store_true")
-    parser.add_argument("--sign", action="store_true", help="Sign commit/tag when GPG is configured")
-    parser.add_argument("--skip-prepare", action="store_true", help="Skip running prepare_initial_commit")
+    parser.add_argument(
+        "--sign", action="store_true", help="Sign commit/tag when GPG is configured"
+    )
+    parser.add_argument(
+        "--skip-prepare",
+        action="store_true",
+        help="Skip running prepare_initial_commit",
+    )
     args = parser.parse_args()
 
     try:

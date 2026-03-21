@@ -7,7 +7,7 @@ import argparse
 import configparser
 import json
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -33,7 +33,11 @@ class TrackValidator:
     LENGTH_TOLERANCE_KM = 0.01
     EXPECTED_TURNS = 16
 
-    def __init__(self, config_path: str | Path = "configs/config.json", track_id: str = "yas_marina") -> None:
+    def __init__(
+        self,
+        config_path: str | Path = "configs/config.json",
+        track_id: str = "yas_marina",
+    ) -> None:
         self.config = ConfigManager(config_path).load()
         self.track_id = track_id
         self.track_root = self._resolve_track_root(track_id)
@@ -60,7 +64,9 @@ class TrackValidator:
             if matches:
                 return matches[0]
 
-        raise FileNotFoundError(f"Track folder not found for id '{track_id}' under {tracks_dir}")
+        raise FileNotFoundError(
+            f"Track folder not found for id '{track_id}' under {tracks_dir}"
+        )
 
     @staticmethod
     def _normalize_track_id(text: str) -> str:
@@ -87,7 +93,9 @@ class TrackValidator:
                 return layout
         return layouts[0]
 
-    def _exists_anywhere(self, relative_paths: list[str], allow_glob: bool = False) -> bool:
+    def _exists_anywhere(
+        self, relative_paths: list[str], allow_glob: bool = False
+    ) -> bool:
         search_roots = [self.track_root] + self.layout_dirs
         for root in search_roots:
             for rel in relative_paths:
@@ -131,13 +139,22 @@ class TrackValidator:
             "models_ini": ["models.ini", "models_gp.ini", "models_*.ini"],
             "surfaces_ini": ["data/surfaces.ini"],
             "ai_line": ["ai/fast_lane.ai", "ai/fast_lane.csv"],
-            "map": ["map.png", "map.jpg", "ui/map.png", "ui/map.jpg", "data/map.ini", "map.ini"],
+            "map": [
+                "map.png",
+                "map.jpg",
+                "ui/map.png",
+                "ui/map.jpg",
+                "data/map.ini",
+                "map.ini",
+            ],
         }
         results: list[ValidationResult] = []
         for check_name, patterns in required_any.items():
             found = self._exists_anywhere(patterns, allow_glob=True)
             if found:
-                results.append(ValidationResult(check_name, "PASS", "Required content found."))
+                results.append(
+                    ValidationResult(check_name, "PASS", "Required content found.")
+                )
             else:
                 results.append(
                     ValidationResult(
@@ -188,7 +205,11 @@ class TrackValidator:
             except Exception:
                 LOGGER.exception("Failed parsing ui_track.json")
 
-        map_ini = (self.primary_layout / "data" / "map.ini") if self.primary_layout else (self.track_root / "data" / "map.ini")
+        map_ini = (
+            (self.primary_layout / "data" / "map.ini")
+            if self.primary_layout
+            else (self.track_root / "data" / "map.ini")
+        )
         if map_ini.exists():
             parser = configparser.ConfigParser()
             parser.read(map_ini, encoding="utf-8")
@@ -200,7 +221,11 @@ class TrackValidator:
                     except ValueError:
                         pass
 
-        pit_ini = (self.primary_layout / "data" / "pit_lane.ini") if self.primary_layout else (self.track_root / "data" / "pit_lane.ini")
+        pit_ini = (
+            (self.primary_layout / "data" / "pit_lane.ini")
+            if self.primary_layout
+            else (self.track_root / "data" / "pit_lane.ini")
+        )
         if pit_ini.exists():
             parser = configparser.ConfigParser()
             parser.read(pit_ini, encoding="utf-8")
@@ -227,7 +252,11 @@ class TrackValidator:
 
         delta = abs(float(length) - self.EXPECTED_LENGTH_KM)
         if delta <= self.LENGTH_TOLERANCE_KM:
-            return [ValidationResult("track_length", "PASS", f"Length within tolerance: {length} km")]
+            return [
+                ValidationResult(
+                    "track_length", "PASS", f"Length within tolerance: {length} km"
+                )
+            ]
 
         return [
             ValidationResult(
@@ -251,7 +280,11 @@ class TrackValidator:
             ]
 
         if int(corners) == self.EXPECTED_TURNS:
-            return [ValidationResult("turn_count", "PASS", f"Turns match expected count: {corners}")]
+            return [
+                ValidationResult(
+                    "turn_count", "PASS", f"Turns match expected count: {corners}"
+                )
+            ]
 
         return [
             ValidationResult(
@@ -263,8 +296,12 @@ class TrackValidator:
         ]
 
     def _check_boundaries(self) -> list[ValidationResult]:
-        if self._exists_anywhere(["data/ideal_line_left.csv"]) and self._exists_anywhere(["data/ideal_line_right.csv"]):
-            return [ValidationResult("track_boundaries", "PASS", "Boundary files found.")]
+        if self._exists_anywhere(
+            ["data/ideal_line_left.csv"]
+        ) and self._exists_anywhere(["data/ideal_line_right.csv"]):
+            return [
+                ValidationResult("track_boundaries", "PASS", "Boundary files found.")
+            ]
         return [
             ValidationResult(
                 "track_boundaries",
@@ -288,7 +325,9 @@ class TrackValidator:
 
     def _check_drs(self) -> list[ValidationResult]:
         if self._exists_anywhere(["data/drs_zones.ini"]):
-            return [ValidationResult("drs_zones", "PASS", "DRS zones definition found.")]
+            return [
+                ValidationResult("drs_zones", "PASS", "DRS zones definition found.")
+            ]
         return [
             ValidationResult(
                 "drs_zones",
@@ -300,7 +339,9 @@ class TrackValidator:
 
     def _check_pitlane(self) -> list[ValidationResult]:
         if self._exists_anywhere(["ai/pit_lane.ai", "data/pit_lane.ini"]):
-            return [ValidationResult("pit_lane", "PASS", "Pit lane configuration present.")]
+            return [
+                ValidationResult("pit_lane", "PASS", "Pit lane configuration present.")
+            ]
         return [
             ValidationResult(
                 "pit_lane",
@@ -311,8 +352,12 @@ class TrackValidator:
         ]
 
     def _check_grid(self) -> list[ValidationResult]:
-        if self._exists_anywhere(["data/starting_grid.ini", "ai/pit_lane_with_grid.ai"]):
-            return [ValidationResult("starting_grid", "PASS", "Starting grid file present.")]
+        if self._exists_anywhere(
+            ["data/starting_grid.ini", "ai/pit_lane_with_grid.ai"]
+        ):
+            return [
+                ValidationResult("starting_grid", "PASS", "Starting grid file present.")
+            ]
         return [
             ValidationResult(
                 "starting_grid",
@@ -343,9 +388,21 @@ class TrackValidator:
         for surface_path in surface_files:
             parser = configparser.ConfigParser()
             parser.read(surface_path, encoding="utf-8")
-            sections.extend([name for name in parser.sections() if name.upper().startswith("SURFACE")])
+            sections.extend(
+                [
+                    name
+                    for name in parser.sections()
+                    if name.upper().startswith("SURFACE")
+                ]
+            )
         if sections:
-            return [ValidationResult("surface_types", "PASS", f"Surface definitions found: {len(sections)}")]
+            return [
+                ValidationResult(
+                    "surface_types",
+                    "PASS",
+                    f"Surface definitions found: {len(sections)}",
+                )
+            ]
         return [
             ValidationResult(
                 "surface_types",
@@ -381,7 +438,9 @@ class TrackValidator:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Validate a track installation for RL readiness.")
+    parser = argparse.ArgumentParser(
+        description="Validate a track installation for RL readiness."
+    )
     parser.add_argument("--track-id", type=str, default="yas_marina")
     parser.add_argument("--config", type=Path, default=Path("configs/config.json"))
     return parser

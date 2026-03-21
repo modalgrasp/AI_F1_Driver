@@ -11,13 +11,26 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.bootstrap_common import repo_root, run_cmd, setup_logger, utc_now, write_json
+from scripts.bootstrap_common import (
+    repo_root,
+    run_cmd,
+    setup_logger,
+    utc_now,
+    write_json,
+)
 
 
-def step(label: str, command: list[str], allow_fail: bool, dry_run: bool, logger) -> dict:
+def step(
+    label: str, command: list[str], allow_fail: bool, dry_run: bool, logger
+) -> dict:
     logger.info("[%s] %s", label, " ".join(command))
     if dry_run:
-        return {"label": label, "command": command, "status": "dry-run", "returncode": 0}
+        return {
+            "label": label,
+            "command": command,
+            "status": "dry-run",
+            "returncode": 0,
+        }
     result = run_cmd(command, cwd=repo_root())
     ok = result.returncode == 0 or allow_fail
     return {
@@ -31,7 +44,9 @@ def step(label: str, command: list[str], allow_fail: bool, dry_run: bool, logger
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="End-to-end repository bootstrap runner")
+    parser = argparse.ArgumentParser(
+        description="End-to-end repository bootstrap runner"
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interactive", action="store_true")
     parser.add_argument("--user-name", default="USER_NAME_PLACEHOLDER")
@@ -49,7 +64,12 @@ def main() -> int:
     commands = [
         (
             "1/10 prepare initial commit",
-            [sys.executable, "scripts/prepare_initial_commit.py", "--output-dir", "logs/bootstrap"]
+            [
+                sys.executable,
+                "scripts/prepare_initial_commit.py",
+                "--output-dir",
+                "logs/bootstrap",
+            ]
             + (["--dry-run"] if args.dry_run else [])
             + (["--interactive"] if args.interactive else []),
             False,
@@ -104,22 +124,43 @@ def main() -> int:
             ),
             (
                 "5/10 run phase1 tests",
-                [sys.executable, "scripts/run_phase1_tests.py", "--output-dir", "logs/bootstrap"],
+                [
+                    sys.executable,
+                    "scripts/run_phase1_tests.py",
+                    "--output-dir",
+                    "logs/bootstrap",
+                ],
                 True,
             ),
             (
                 "6/10 generate phase1 report",
-                [sys.executable, "scripts/generate_phase1_report.py", "--output-dir", "docs/reports"],
+                [
+                    sys.executable,
+                    "scripts/generate_phase1_report.py",
+                    "--output-dir",
+                    "docs/reports",
+                ],
                 False,
             ),
             (
                 "7/10 repository health check",
-                [sys.executable, "scripts/check_repository_health.py", "--output-dir", "logs/bootstrap", "--quick"],
+                [
+                    sys.executable,
+                    "scripts/check_repository_health.py",
+                    "--output-dir",
+                    "logs/bootstrap",
+                    "--quick",
+                ],
                 True,
             ),
             (
                 "8/10 validate dev environment",
-                [sys.executable, "scripts/validate_dev_environment.py", "--output-dir", "logs/bootstrap"],
+                [
+                    sys.executable,
+                    "scripts/validate_dev_environment.py",
+                    "--output-dir",
+                    "logs/bootstrap",
+                ],
                 True,
             ),
             (
@@ -130,7 +171,11 @@ def main() -> int:
             ),
             (
                 "10/10 post-bootstrap validation",
-                [sys.executable, "scripts/post_bootstrap_validation.py", "--create-marker"],
+                [
+                    sys.executable,
+                    "scripts/post_bootstrap_validation.py",
+                    "--create-marker",
+                ],
                 True,
             ),
         ]

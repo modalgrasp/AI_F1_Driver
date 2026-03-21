@@ -37,7 +37,9 @@ def smooth_line(xyz: np.ndarray) -> np.ndarray:
     window = max(window, 5)
     smoothed = np.copy(xyz)
     for col in range(3):
-        smoothed[:, col] = savgol_filter(smoothed[:, col], window_length=window, polyorder=3, mode="interp")
+        smoothed[:, col] = savgol_filter(
+            smoothed[:, col], window_length=window, polyorder=3, mode="interp"
+        )
     return smoothed
 
 
@@ -63,7 +65,9 @@ def lookahead_features(curvature: np.ndarray, horizon: int = 50) -> np.ndarray:
 def preprocess(track_id: str) -> dict[str, Any]:
     payload = load_payload(track_id)
     center = np.array(payload["boundaries"]["centerline"], dtype=np.float64)
-    ai_line = np.array([[w["x"], w["y"], w["z"]] for w in payload["waypoints"]], dtype=np.float64)
+    ai_line = np.array(
+        [[w["x"], w["y"], w["z"]] for w in payload["waypoints"]], dtype=np.float64
+    )
 
     center_uniform = resample_line(center, spacing_m=1.0)
     ai_uniform = resample_line(ai_line, spacing_m=1.0)
@@ -87,7 +91,10 @@ def preprocess(track_id: str) -> dict[str, Any]:
     curvature = np.abs(dx * ddz - dz * ddx) / np.power(dx * dx + dz * dz + 1e-9, 1.5)
     lookahead = lookahead_features(curvature, horizon=80)
 
-    min_curvature_line = ai_smooth - np.column_stack([normal[:, 0], np.zeros(len(normal)), normal[:, 1]]) * 0.5
+    min_curvature_line = (
+        ai_smooth
+        - np.column_stack([normal[:, 0], np.zeros(len(normal)), normal[:, 1]]) * 0.5
+    )
     kdtree = cKDTree(ai_smooth[:, [0, 2]])
     _, nearest_idx_demo = kdtree.query(ai_smooth[0, [0, 2]], k=5)
 
@@ -112,7 +119,9 @@ def preprocess(track_id: str) -> dict[str, Any]:
     out_dir = Path("data/tracks") / track_id / "preprocessed"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    (out_dir / f"{track_id}_preprocessed.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    (out_dir / f"{track_id}_preprocessed.json").write_text(
+        json.dumps(result, indent=2), encoding="utf-8"
+    )
     np.savez(
         out_dir / f"{track_id}_preprocessed.npz",
         centerline=center_uniform.astype(np.float32),
@@ -130,7 +139,9 @@ def preprocess(track_id: str) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Preprocess racing lines for optimization")
+    parser = argparse.ArgumentParser(
+        description="Preprocess racing lines for optimization"
+    )
     parser.add_argument("--track-id", default="yas_marina")
     args = parser.parse_args()
     result = preprocess(args.track_id)

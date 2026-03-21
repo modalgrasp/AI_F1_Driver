@@ -8,7 +8,12 @@ from pathlib import Path
 
 STRUCTURE = {
     "environments": ["__init__.py", "f1_racing_env.py", "assetto_corsa_connector.py"],
-    "utils": ["__init__.py", "shared_memory_reader.py", "config_manager.py", "logger_config.py"],
+    "utils": [
+        "__init__.py",
+        "shared_memory_reader.py",
+        "config_manager.py",
+        "logger_config.py",
+    ],
     "tests": ["__init__.py", "test_environment.py"],
     "logs": [".gitkeep"],
     "data": [".gitkeep"],

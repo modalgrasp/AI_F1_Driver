@@ -13,7 +13,15 @@ from typing import Any
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.bootstrap_common import repo_root, run_cmd, setup_logger, system_snapshot, utc_now, write_json, write_text
+from scripts.bootstrap_common import (
+    repo_root,
+    run_cmd,
+    setup_logger,
+    system_snapshot,
+    utc_now,
+    write_json,
+    write_text,
+)
 
 
 def safe_json(path: Path) -> dict[str, Any]:
@@ -30,7 +38,9 @@ def collect_package_versions(packages: list[str]) -> dict[str, str]:
     for package in packages:
         code = f"import importlib; m=importlib.import_module('{package}'); print(getattr(m, '__version__', 'unknown'))"
         result = run_cmd([sys.executable, "-c", code], cwd=repo_root())
-        versions[package] = result.stdout.strip() if result.returncode == 0 else "not-installed"
+        versions[package] = (
+            result.stdout.strip() if result.returncode == 0 else "not-installed"
+        )
     return versions
 
 
@@ -39,7 +49,9 @@ def code_stats(root: Path) -> dict[str, Any]:
     total_lines = 0
     for path in py_files:
         try:
-            total_lines += len(path.read_text(encoding="utf-8", errors="ignore").splitlines())
+            total_lines += len(
+                path.read_text(encoding="utf-8", errors="ignore").splitlines()
+            )
         except OSError:
             pass
     return {
@@ -56,7 +68,9 @@ def git_info(root: Path) -> dict[str, Any]:
     tags = run_cmd(["git", "tag", "--list"], cwd=root)
     return {
         "head": commit.stdout if commit.returncode == 0 else "unknown",
-        "commit_count": int(count.stdout) if count.returncode == 0 and count.stdout.isdigit() else 0,
+        "commit_count": (
+            int(count.stdout) if count.returncode == 0 and count.stdout.isdigit() else 0
+        ),
         "remotes": remotes.stdout.splitlines() if remotes.returncode == 0 else [],
         "tags": tags.stdout.splitlines() if tags.returncode == 0 else [],
     }
@@ -116,7 +130,9 @@ def build_payload(root: Path) -> dict[str, Any]:
     }
 
 
-def write_outputs(root: Path, payload: dict[str, Any], output_dir: Path, include_pdf: bool) -> dict[str, str]:
+def write_outputs(
+    root: Path, payload: dict[str, Any], output_dir: Path, include_pdf: bool
+) -> dict[str, str]:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     json_path = output_dir / "phase1_completion_report.json"

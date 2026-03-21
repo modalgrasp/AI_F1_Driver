@@ -23,7 +23,9 @@ def run(command: list[str], cwd: Path) -> tuple[int, str]:
 
 def ensure_git_installed() -> None:
     if shutil.which("git") is None:
-        raise RuntimeError("Git not found. Install Git from https://git-scm.com/downloads")
+        raise RuntimeError(
+            "Git not found. Install Git from https://git-scm.com/downloads"
+        )
 
 
 def configure_git(root: Path, user_name: str, user_email: str) -> None:
@@ -78,7 +80,7 @@ def create_hooks(root: Path) -> None:
         "#!/usr/bin/env bash\n"
         "msg_file=$1\n"
         "pattern='^(feat|fix|docs|style|refactor|test|chore)\\([a-zA-Z0-9_-]+\\): .+'\n"
-        "if ! grep -Eq \"$pattern\" \"$msg_file\"; then\n"
+        'if ! grep -Eq "$pattern" "$msg_file"; then\n'
         "  echo 'Commit message must match <type>(<scope>): <subject>'\n"
         "  exit 1\n"
         "fi\n",
@@ -92,7 +94,9 @@ def create_hooks(root: Path) -> None:
 
 def initial_commit(root: Path) -> None:
     run(["git", "add", "."], root)
-    code, out = run(["git", "commit", "-m", "chore(repo): initialize project structure"], root)
+    code, out = run(
+        ["git", "commit", "-m", "chore(repo): initialize project structure"], root
+    )
     if code != 0 and "nothing to commit" not in out.lower():
         raise RuntimeError(f"Initial commit failed: {out}")
 

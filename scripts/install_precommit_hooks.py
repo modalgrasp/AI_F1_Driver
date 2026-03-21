@@ -13,8 +13,14 @@ from typing import Any
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.bootstrap_common import repo_root, run_cmd, setup_logger, utc_now, write_json, write_text
-
+from scripts.bootstrap_common import (
+    repo_root,
+    run_cmd,
+    setup_logger,
+    utc_now,
+    write_json,
+    write_text,
+)
 
 HOOK_NAMES = [
     "black",
@@ -32,7 +38,9 @@ HOOK_NAMES = [
 AUTO_FIX_HOOKS = {"black", "isort", "trailing-whitespace", "end-of-file-fixer"}
 
 
-def ensure_precommit_installed(python_exec: str, dry_run: bool, logger) -> dict[str, Any]:
+def ensure_precommit_installed(
+    python_exec: str, dry_run: bool, logger
+) -> dict[str, Any]:
     probe = run_cmd([python_exec, "-m", "pre_commit", "--version"], cwd=repo_root())
     if probe.returncode == 0:
         return {"installed": True, "version": probe.stdout}
@@ -40,7 +48,9 @@ def ensure_precommit_installed(python_exec: str, dry_run: bool, logger) -> dict[
     if dry_run:
         return {"installed": False, "action": "would-install"}
 
-    install = run_cmd([python_exec, "-m", "pip", "install", "pre-commit"], cwd=repo_root())
+    install = run_cmd(
+        [python_exec, "-m", "pip", "install", "pre-commit"], cwd=repo_root()
+    )
     return {
         "installed": install.returncode == 0,
         "stdout": install.stdout,
@@ -91,7 +101,9 @@ def parse_hook_results(output: str) -> dict[str, dict[str, Any]]:
     return parsed
 
 
-def run_all_files(auto_stage: bool, interactive: bool, dry_run: bool, logger) -> dict[str, Any]:
+def run_all_files(
+    auto_stage: bool, interactive: bool, dry_run: bool, logger
+) -> dict[str, Any]:
     if dry_run:
         return {"status": "dry-run", "hooks": {}}
 
@@ -100,10 +112,18 @@ def run_all_files(auto_stage: bool, interactive: bool, dry_run: bool, logger) ->
     hook_map = parse_hook_results(combined)
 
     modified = run_cmd(["git", "status", "--porcelain"], cwd=repo_root())
-    changed_files = [line[3:] for line in modified.stdout.splitlines() if line and not line.startswith("??")]
+    changed_files = [
+        line[3:]
+        for line in modified.stdout.splitlines()
+        if line and not line.startswith("??")
+    ]
 
-    failed_hooks = [name for name, item in hook_map.items() if item["status"] == "failed"]
-    auto_fix_only = failed_hooks and all(hook in AUTO_FIX_HOOKS for hook in failed_hooks)
+    failed_hooks = [
+        name for name, item in hook_map.items() if item["status"] == "failed"
+    ]
+    auto_fix_only = failed_hooks and all(
+        hook in AUTO_FIX_HOOKS for hook in failed_hooks
+    )
 
     rerun = None
     if auto_stage and changed_files:
@@ -111,13 +131,17 @@ def run_all_files(auto_stage: bool, interactive: bool, dry_run: bool, logger) ->
 
     if auto_fix_only and changed_files:
         rerun = run_cmd(["pre-commit", "run", "--all-files"], cwd=repo_root())
-        hook_map = parse_hook_results((rerun.stdout or "") + "\n" + (rerun.stderr or ""))
+        hook_map = parse_hook_results(
+            (rerun.stdout or "") + "\n" + (rerun.stderr or "")
+        )
 
     if interactive and failed_hooks and not auto_fix_only:
         print("Manual intervention required for hooks:", ", ".join(failed_hooks))
         _ = input("Fix issues and press Enter to continue (or Ctrl+C to stop)...")
         rerun = run_cmd(["pre-commit", "run", "--all-files"], cwd=repo_root())
-        hook_map = parse_hook_results((rerun.stdout or "") + "\n" + (rerun.stderr or ""))
+        hook_map = parse_hook_results(
+            (rerun.stdout or "") + "\n" + (rerun.stderr or "")
+        )
 
     return {
         "first_run": {
@@ -125,13 +149,15 @@ def run_all_files(auto_stage: bool, interactive: bool, dry_run: bool, logger) ->
             "stdout": first.stdout,
             "stderr": first.stderr,
         },
-        "rerun": None
-        if rerun is None
-        else {
-            "returncode": rerun.returncode,
-            "stdout": rerun.stdout,
-            "stderr": rerun.stderr,
-        },
+        "rerun": (
+            None
+            if rerun is None
+            else {
+                "returncode": rerun.returncode,
+                "stdout": rerun.stdout,
+                "stderr": rerun.stderr,
+            }
+        ),
         "hooks": hook_map,
         "changed_files": changed_files,
     }
@@ -159,7 +185,9 @@ def write_guide(root: Path) -> Path:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install and validate pre-commit hooks")
+    parser = argparse.ArgumentParser(
+        description="Install and validate pre-commit hooks"
+    )
     parser.add_argument("--python", default="python")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interactive", action="store_true")
@@ -173,7 +201,11 @@ def main() -> int:
     try:
         install_info = ensure_precommit_installed(args.python, args.dry_run, logger)
         hook_install = install_hooks(args.dry_run)
-        run_report = {"status": "skipped"} if args.skip_run else run_all_files(args.auto_stage, args.interactive, args.dry_run, logger)
+        run_report = (
+            {"status": "skipped"}
+            if args.skip_run
+            else run_all_files(args.auto_stage, args.interactive, args.dry_run, logger)
+        )
         usage = write_guide(root)
 
         report = {

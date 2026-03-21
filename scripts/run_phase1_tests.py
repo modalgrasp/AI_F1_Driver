@@ -17,7 +17,15 @@ from typing import Any, Callable
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.bootstrap_common import human_size, repo_root, run_cmd, setup_logger, utc_now, write_json, write_text
+from scripts.bootstrap_common import (
+    human_size,
+    repo_root,
+    run_cmd,
+    setup_logger,
+    utc_now,
+    write_json,
+    write_text,
+)
 
 
 @dataclass
@@ -39,7 +47,9 @@ class Phase1TestRunner:
         self.logger = setup_logger("run_phase1_tests")
         self.results: list[TestCaseResult] = []
 
-    def run_case(self, idx: int, name: str, critical: bool, fn: Callable[[], tuple[bool, str]]) -> None:
+    def run_case(
+        self, idx: int, name: str, critical: bool, fn: Callable[[], tuple[bool, str]]
+    ) -> None:
         t0 = time.perf_counter()
         try:
             passed, message = fn()
@@ -84,10 +94,14 @@ class Phase1TestRunner:
         return result.returncode == 0, (result.stdout or result.stderr)[-300:]
 
     def _yas_install(self) -> tuple[bool, str]:
-        track_root = Path("D:/SteamLibrary/steamapps/common/assettocorsa/content/tracks/acu_yasmarina")
+        track_root = Path(
+            "D:/SteamLibrary/steamapps/common/assettocorsa/content/tracks/acu_yasmarina"
+        )
         if not track_root.exists():
             # fallback to config-based path
-            cfg = json.loads((self.root / "configs" / "config.json").read_text(encoding="utf-8"))
+            cfg = json.loads(
+                (self.root / "configs" / "config.json").read_text(encoding="utf-8")
+            )
             ac = Path(cfg["assetto_corsa"]["install_path"])
             candidates = list((ac / "content" / "tracks").glob("*yas*"))
             ok = bool(candidates)
@@ -95,39 +109,93 @@ class Phase1TestRunner:
         return True, str(track_root)
 
     def _track_data(self) -> tuple[bool, str]:
-        path = self.root / "data" / "tracks" / "yas_marina" / "extracted" / "yas_marina_track_data.json"
+        path = (
+            self.root
+            / "data"
+            / "tracks"
+            / "yas_marina"
+            / "extracted"
+            / "yas_marina_track_data.json"
+        )
         if not path.exists():
             return False, "track data json missing"
         data = json.loads(path.read_text(encoding="utf-8"))
         wp = len(data.get("waypoints", []))
         boundaries = data.get("boundaries", {})
-        ok = wp >= 1000 and bool(boundaries.get("left")) and bool(boundaries.get("right"))
+        ok = (
+            wp >= 1000
+            and bool(boundaries.get("left"))
+            and bool(boundaries.get("right"))
+        )
         return ok, f"waypoints={wp}"
 
     def _track_visualization(self) -> tuple[bool, str]:
-        out = self.root / "data" / "tracks" / "yas_marina" / "visualizations" / "yas_marina_layout_2d.png"
+        out = (
+            self.root
+            / "data"
+            / "tracks"
+            / "yas_marina"
+            / "visualizations"
+            / "yas_marina_layout_2d.png"
+        )
         if out.exists():
             return True, str(out)
-        result = run_cmd([sys.executable, "track_visualizer.py", "--track-id", "yas_marina"], cwd=self.root)
+        result = run_cmd(
+            [sys.executable, "track_visualizer.py", "--track-id", "yas_marina"],
+            cwd=self.root,
+        )
         return out.exists(), result.stdout or result.stderr
 
     def _track_integration(self) -> tuple[bool, str]:
-        path = self.root / "data" / "tracks" / "yas_marina" / "integration" / "integration_report.json"
+        path = (
+            self.root
+            / "data"
+            / "tracks"
+            / "yas_marina"
+            / "integration"
+            / "integration_report.json"
+        )
         if not path.exists():
-            result = run_cmd([sys.executable, "integrate_track_with_environment.py", "--track-id", "yas_marina", "--episodes", "1"], cwd=self.root)
+            result = run_cmd(
+                [
+                    sys.executable,
+                    "integrate_track_with_environment.py",
+                    "--track-id",
+                    "yas_marina",
+                    "--episodes",
+                    "1",
+                ],
+                cwd=self.root,
+            )
             return result.returncode == 0, result.stdout or result.stderr
         payload = json.loads(path.read_text(encoding="utf-8"))
         ok = bool(payload.get("episodes"))
         return ok, f"episodes={len(payload.get('episodes', []))}"
 
     def _cuda_available(self) -> tuple[bool, str]:
-        result = run_cmd([sys.executable, "-c", "import torch;print(torch.cuda.is_available(), torch.version.cuda, torch.backends.cudnn.is_available())"], cwd=self.root)
+        result = run_cmd(
+            [
+                sys.executable,
+                "-c",
+                "import torch;print(torch.cuda.is_available(), torch.version.cuda, torch.backends.cudnn.is_available())",
+            ],
+            cwd=self.root,
+        )
         ok = result.returncode == 0 and "True" in result.stdout.split()[0]
         return ok, result.stdout or result.stderr
 
     def _gpu_detect(self) -> tuple[bool, str]:
-        result = run_cmd([sys.executable, "-c", "import torch;print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none');print(round(torch.cuda.get_device_properties(0).total_memory/(1024**3),2) if torch.cuda.is_available() else 0)"], cwd=self.root)
-        ok = result.returncode == 0 and ("5070" in result.stdout or "RTX" in result.stdout)
+        result = run_cmd(
+            [
+                sys.executable,
+                "-c",
+                "import torch;print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none');print(round(torch.cuda.get_device_properties(0).total_memory/(1024**3),2) if torch.cuda.is_available() else 0)",
+            ],
+            cwd=self.root,
+        )
+        ok = result.returncode == 0 and (
+            "5070" in result.stdout or "RTX" in result.stdout
+        )
         return ok, result.stdout or result.stderr
 
     def _pytorch_gpu_ops(self) -> tuple[bool, str]:
@@ -136,8 +204,18 @@ class Phase1TestRunner:
         return result.returncode == 0, result.stdout or result.stderr
 
     def _mixed_precision(self) -> tuple[bool, str]:
-        result = run_cmd([sys.executable, "-c", "import torch;assert torch.cuda.is_available();x=torch.randn((256,256),device='cuda');w=torch.randn((256,256),device='cuda');\nwith torch.autocast('cuda',dtype=torch.float16):y=x@w\nprint(y.dtype)"], cwd=self.root)
-        return result.returncode == 0 and "float16" in result.stdout, result.stdout or result.stderr
+        result = run_cmd(
+            [
+                sys.executable,
+                "-c",
+                "import torch;assert torch.cuda.is_available();x=torch.randn((256,256),device='cuda');w=torch.randn((256,256),device='cuda');\nwith torch.autocast('cuda',dtype=torch.float16):y=x@w\nprint(y.dtype)",
+            ],
+            cwd=self.root,
+        )
+        return (
+            result.returncode == 0 and "float16" in result.stdout,
+            result.stdout or result.stderr,
+        )
 
     def _memory_management(self) -> tuple[bool, str]:
         code = "import torch;assert torch.cuda.is_available();x=torch.empty((1024,1024,8),device='cuda');del x;torch.cuda.empty_cache();print('ok')"
@@ -145,7 +223,17 @@ class Phase1TestRunner:
         return result.returncode == 0, result.stdout or result.stderr
 
     def _batch_opt(self) -> tuple[bool, str]:
-        result = run_cmd([sys.executable, "batch_size_optimizer.py", "--min-batch", "32", "--max-batch", "1024"], cwd=self.root)
+        result = run_cmd(
+            [
+                sys.executable,
+                "batch_size_optimizer.py",
+                "--min-batch",
+                "32",
+                "--max-batch",
+                "1024",
+            ],
+            cwd=self.root,
+        )
         return result.returncode == 0, (result.stdout or result.stderr)[-300:]
 
     def _git_repo(self) -> tuple[bool, str]:
@@ -154,7 +242,9 @@ class Phase1TestRunner:
         return git_dir.exists() and status.returncode == 0, "git status ok"
 
     def _project_structure(self) -> tuple[bool, str]:
-        result = run_cmd([sys.executable, "validate_project_structure.py"], cwd=self.root)
+        result = run_cmd(
+            [sys.executable, "validate_project_structure.py"], cwd=self.root
+        )
         ok = result.returncode == 0 and '"ok": true' in (result.stdout or "").lower()
         return ok, (result.stdout or result.stderr)[-400:]
 
@@ -194,16 +284,38 @@ class Phase1TestRunner:
 
     def _precommit_working(self) -> tuple[bool, str]:
         hooks = self.root / ".git" / "hooks"
-        ok = (hooks / "pre-commit").exists() and (hooks / "commit-msg").exists() and (hooks / "pre-push").exists()
+        ok = (
+            (hooks / "pre-commit").exists()
+            and (hooks / "commit-msg").exists()
+            and (hooks / "pre-push").exists()
+        )
         return ok, "hooks present" if ok else "hooks missing"
 
     def _end_to_end(self) -> tuple[bool, str]:
-        result = run_cmd([sys.executable, "integrate_track_with_environment.py", "--track-id", "yas_marina", "--episodes", "1"], cwd=self.root)
+        result = run_cmd(
+            [
+                sys.executable,
+                "integrate_track_with_environment.py",
+                "--track-id",
+                "yas_marina",
+                "--episodes",
+                "1",
+            ],
+            cwd=self.root,
+        )
         return result.returncode == 0, (result.stdout or result.stderr)[-250:]
 
     def _perf_benchmark(self) -> tuple[bool, str]:
         t0 = time.perf_counter()
-        result = run_cmd([sys.executable, "scripts/train.py", "--config", "configs/training_config.json"], cwd=self.root)
+        result = run_cmd(
+            [
+                sys.executable,
+                "scripts/train.py",
+                "--config",
+                "configs/training_config.json",
+            ],
+            cwd=self.root,
+        )
         dt = time.perf_counter() - t0
         ok = result.returncode == 0 and dt < 20.0
         return ok, f"train-entrypoint-seconds={dt:.2f}"
@@ -217,7 +329,10 @@ class Phase1TestRunner:
         return ok, f"cpu={cpu:.1f}% ram={mem.percent:.1f}%"
 
     def _pytest_smoke(self) -> tuple[bool, str]:
-        result = run_cmd([sys.executable, "-m", "pytest", "-q", "tests/test_environment.py"], cwd=self.root)
+        result = run_cmd(
+            [sys.executable, "-m", "pytest", "-q", "tests/test_environment.py"],
+            cwd=self.root,
+        )
         return result.returncode == 0, (result.stdout or result.stderr)[-250:]
 
     def _phase_marker(self) -> tuple[bool, str]:
@@ -238,13 +353,23 @@ class Phase1TestRunner:
     def _requirements_lock(self) -> tuple[bool, str]:
         req = self.root / "requirements.txt"
         dev = self.root / "requirements-dev.txt"
-        ok = req.exists() and dev.exists() and req.stat().st_size > 0 and dev.stat().st_size > 0
-        return ok, f"requirements={human_size(req.stat().st_size)} dev={human_size(dev.stat().st_size)}"
+        ok = (
+            req.exists()
+            and dev.exists()
+            and req.stat().st_size > 0
+            and dev.stat().st_size > 0
+        )
+        return (
+            ok,
+            f"requirements={human_size(req.stat().st_size)} dev={human_size(dev.stat().st_size)}",
+        )
 
     def _git_clean_state(self) -> tuple[bool, str]:
         status = run_cmd(["git", "status", "--porcelain"], cwd=self.root)
         clean = len(status.stdout.strip()) == 0
-        return clean, "clean" if clean else f"dirty lines={len(status.stdout.splitlines())}"
+        return clean, (
+            "clean" if clean else f"dirty lines={len(status.stdout.splitlines())}"
+        )
 
     def _report_dirs(self) -> tuple[bool, str]:
         out = self.root / "docs" / "reports"
@@ -255,13 +380,37 @@ class Phase1TestRunner:
         tests: list[tuple[int, str, bool, Callable[[], tuple[bool, str]], str]] = [
             (1, "Python version check", True, self._python_version, "environment"),
             (2, "Virtual environment active", True, self._venv_active, "environment"),
-            (3, "Dependency conflict check", True, self._requirements_installed, "environment"),
+            (
+                3,
+                "Dependency conflict check",
+                True,
+                self._requirements_installed,
+                "environment",
+            ),
             (4, "Assetto Corsa detection", True, self._assetto_detect, "environment"),
-            (5, "Gym environment creation", True, self._gym_env_creation, "environment"),
-            (6, "Random agent episode smoke", True, self._random_episode, "environment"),
+            (
+                5,
+                "Gym environment creation",
+                True,
+                self._gym_env_creation,
+                "environment",
+            ),
+            (
+                6,
+                "Random agent episode smoke",
+                True,
+                self._random_episode,
+                "environment",
+            ),
             (7, "Yas Marina installation", True, self._yas_install, "track"),
             (8, "Track data extraction integrity", True, self._track_data, "track"),
-            (9, "Track visualization generation", False, self._track_visualization, "track"),
+            (
+                9,
+                "Track visualization generation",
+                False,
+                self._track_visualization,
+                "track",
+            ),
             (10, "Track integration", True, self._track_integration, "track"),
             (11, "CUDA availability", True, self._cuda_available, "gpu"),
             (12, "GPU detection", True, self._gpu_detect, "gpu"),
@@ -275,7 +424,13 @@ class Phase1TestRunner:
             (20, "Module import tests", True, self._import_tests, "repo"),
             (21, "Documentation presence", False, self._documentation, "repo"),
             (22, "Pre-commit hooks presence", False, self._precommit_working, "repo"),
-            (23, "End-to-end integration workflow", True, self._end_to_end, "integration"),
+            (
+                23,
+                "End-to-end integration workflow",
+                True,
+                self._end_to_end,
+                "integration",
+            ),
             (24, "Performance benchmark", False, self._perf_benchmark, "integration"),
             (25, "Resource usage sanity", False, self._resource_usage, "integration"),
             (26, "Pytest smoke run", False, self._pytest_smoke, "integration"),
@@ -297,7 +452,9 @@ class Phase1TestRunner:
         output_dir.mkdir(parents=True, exist_ok=True)
         passed = sum(1 for test in self.results if test.passed)
         failed = len(self.results) - passed
-        critical_failed = [test for test in self.results if (not test.passed and test.critical)]
+        critical_failed = [
+            test for test in self.results if (not test.passed and test.critical)
+        ]
 
         payload = {
             "timestamp": utc_now(),
@@ -325,7 +482,9 @@ class Phase1TestRunner:
         ]
         for test in self.results:
             status = "PASS" if test.passed else "FAIL"
-            md_lines.append(f"- [{status}] T{test.id}: {test.name} ({test.duration_ms:.1f} ms) - {test.message}")
+            md_lines.append(
+                f"- [{status}] T{test.id}: {test.name} ({test.duration_ms:.1f} ms) - {test.message}"
+            )
         write_text(output_dir / "phase1_test_report.md", "\n".join(md_lines) + "\n")
 
         html = [
@@ -351,7 +510,11 @@ class Phase1TestRunner:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run comprehensive Phase 1 test suite")
-    parser.add_argument("--subset", choices=["all", "environment", "track", "gpu", "repo", "integration"], default="all")
+    parser.add_argument(
+        "--subset",
+        choices=["all", "environment", "track", "gpu", "repo", "integration"],
+        default="all",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("logs/bootstrap"))
     args = parser.parse_args()
 

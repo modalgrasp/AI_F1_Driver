@@ -54,7 +54,9 @@ def pairwise_distance(points_a: torch.Tensor, points_b: torch.Tensor) -> torch.T
     return torch.cdist(points_a, points_b)
 
 
-def reward_kernel(progress: torch.Tensor, offtrack: torch.Tensor, collision: torch.Tensor) -> torch.Tensor:
+def reward_kernel(
+    progress: torch.Tensor, offtrack: torch.Tensor, collision: torch.Tensor
+) -> torch.Tensor:
     ext = build_extension(verbose=False)
     if ext is not None and progress.is_cuda:
         return ext.reward_kernel_cuda(progress, offtrack, collision)

@@ -22,15 +22,25 @@ class AMPMetrics:
 
 
 class MixedPrecisionManager:
-    def __init__(self, enabled: bool = True, dtype: str = "float16", init_scale: float = 65536.0) -> None:
+    def __init__(
+        self, enabled: bool = True, dtype: str = "float16", init_scale: float = 65536.0
+    ) -> None:
         self.enabled = enabled and torch.cuda.is_available()
-        self.autocast_dtype = torch.float16 if dtype.lower() == "float16" else torch.bfloat16
-        self.scaler = torch.amp.GradScaler("cuda", enabled=self.enabled, init_scale=init_scale)
+        self.autocast_dtype = (
+            torch.float16 if dtype.lower() == "float16" else torch.bfloat16
+        )
+        self.scaler = torch.amp.GradScaler(
+            "cuda", enabled=self.enabled, init_scale=init_scale
+        )
 
     def autocast(self):
-        return torch.autocast(device_type="cuda", dtype=self.autocast_dtype, enabled=self.enabled)
+        return torch.autocast(
+            device_type="cuda", dtype=self.autocast_dtype, enabled=self.enabled
+        )
 
-    def backward_step(self, loss: torch.Tensor, optimizer: torch.optim.Optimizer) -> None:
+    def backward_step(
+        self, loss: torch.Tensor, optimizer: torch.optim.Optimizer
+    ) -> None:
         self.scaler.scale(loss).backward()
         self.scaler.step(optimizer)
         self.scaler.update()
@@ -51,9 +61,13 @@ class MixedPrecisionManager:
         self.backward_step(loss, optimizer)
         return float(loss.detach().item())
 
-    def benchmark_wrapper(self, model: torch.nn.Module, batch_shape: tuple[int, ...], steps: int = 100) -> AMPMetrics:
+    def benchmark_wrapper(
+        self, model: torch.nn.Module, batch_shape: tuple[int, ...], steps: int = 100
+    ) -> AMPMetrics:
         if not torch.cuda.is_available():
-            return AMPMetrics(steps=0, seconds=0.0, iter_per_sec=0.0, peak_memory_gb=0.0)
+            return AMPMetrics(
+                steps=0, seconds=0.0, iter_per_sec=0.0, peak_memory_gb=0.0
+            )
         device = "cuda:0"
         model = model.to(device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
@@ -70,10 +84,19 @@ class MixedPrecisionManager:
         dt = time.perf_counter() - t0
 
         peak = torch.cuda.max_memory_allocated(0) / (1024**3)
-        return AMPMetrics(steps=steps, seconds=dt, iter_per_sec=steps / max(dt, 1e-9), peak_memory_gb=peak)
+        return AMPMetrics(
+            steps=steps,
+            seconds=dt,
+            iter_per_sec=steps / max(dt, 1e-9),
+            peak_memory_gb=peak,
+        )
 
 
-def rl_amp_example_step(policy: torch.nn.Module, optimizer: torch.optim.Optimizer, batch: dict[str, torch.Tensor]) -> dict[str, Any]:
+def rl_amp_example_step(
+    policy: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    batch: dict[str, torch.Tensor],
+) -> dict[str, Any]:
     amp = MixedPrecisionManager(enabled=True, dtype="float16")
     obs = batch["obs"].to("cuda")
     target = batch["target"].to("cuda")

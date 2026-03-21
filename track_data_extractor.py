@@ -9,7 +9,7 @@ import csv
 import json
 import logging
 import pickle
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -35,10 +35,16 @@ class Waypoint:
 class TrackDataExtractor:
     """Extract AI line and supporting geometry with graceful fallbacks."""
 
-    def __init__(self, config_path: str | Path = "configs/config.json", track_id: str = "yas_marina") -> None:
+    def __init__(
+        self,
+        config_path: str | Path = "configs/config.json",
+        track_id: str = "yas_marina",
+    ) -> None:
         config = ConfigManager(config_path).load()
         self.track_id = track_id
-        self.track_root = self._resolve_track_root(Path(config["assetto_corsa"]["install_path"]), track_id)
+        self.track_root = self._resolve_track_root(
+            Path(config["assetto_corsa"]["install_path"]), track_id
+        )
         self.layout_dirs = self._layout_dirs(self.track_root)
         self.primary_layout = self._select_primary_layout(self.layout_dirs)
         self.output_root = Path("data/tracks") / track_id / "extracted"
@@ -119,10 +125,28 @@ class TrackDataExtractor:
         return payload
 
     def _extract_waypoints(self) -> list[Waypoint]:
-        search_roots = ([self.primary_layout] if self.primary_layout else []) + self.layout_dirs + [self.track_root]
+        search_roots = (
+            ([self.primary_layout] if self.primary_layout else [])
+            + self.layout_dirs
+            + [self.track_root]
+        )
 
-        csv_lane = next((root / "ai" / "fast_lane.csv" for root in search_roots if root and (root / "ai" / "fast_lane.csv").exists()), None)
-        ai_lane = next((root / "ai" / "fast_lane.ai" for root in search_roots if root and (root / "ai" / "fast_lane.ai").exists()), None)
+        csv_lane = next(
+            (
+                root / "ai" / "fast_lane.csv"
+                for root in search_roots
+                if root and (root / "ai" / "fast_lane.csv").exists()
+            ),
+            None,
+        )
+        ai_lane = next(
+            (
+                root / "ai" / "fast_lane.ai"
+                for root in search_roots
+                if root and (root / "ai" / "fast_lane.ai").exists()
+            ),
+            None,
+        )
 
         if csv_lane is not None and csv_lane.exists():
             return self._parse_fast_lane_csv(csv_lane)
@@ -134,9 +158,13 @@ class TrackDataExtractor:
             if parsed and self._waypoints_plausible(parsed):
                 return parsed
             if parsed:
-                LOGGER.warning("Binary AI parse deemed implausible; using synthetic fallback.")
+                LOGGER.warning(
+                    "Binary AI parse deemed implausible; using synthetic fallback."
+                )
 
-        LOGGER.warning("No parseable AI lane found. Building synthetic centerline fallback.")
+        LOGGER.warning(
+            "No parseable AI lane found. Building synthetic centerline fallback."
+        )
         return self._synthetic_waypoints()
 
     def _waypoints_plausible(self, waypoints: list[Waypoint]) -> bool:
@@ -200,7 +228,9 @@ class TrackDataExtractor:
             )
             for row in triples
         ]
-        LOGGER.warning("Binary fast_lane.ai parsed with fallback heuristic. Verify geometry manually.")
+        LOGGER.warning(
+            "Binary fast_lane.ai parsed with fallback heuristic. Verify geometry manually."
+        )
         return waypoints
 
     def _synthetic_waypoints(self, count: int = 1200) -> list[Waypoint]:
@@ -217,8 +247,19 @@ class TrackDataExtractor:
         ]
 
     def _extract_surfaces(self) -> list[dict[str, Any]]:
-        search_roots = ([self.primary_layout] if self.primary_layout else []) + self.layout_dirs + [self.track_root]
-        path = next((root / "data" / "surfaces.ini" for root in search_roots if root and (root / "data" / "surfaces.ini").exists()), None)
+        search_roots = (
+            ([self.primary_layout] if self.primary_layout else [])
+            + self.layout_dirs
+            + [self.track_root]
+        )
+        path = next(
+            (
+                root / "data" / "surfaces.ini"
+                for root in search_roots
+                if root and (root / "data" / "surfaces.ini").exists()
+            ),
+            None,
+        )
         if path is None or not path.exists():
             return []
 
@@ -233,12 +274,16 @@ class TrackDataExtractor:
                 "key": parser.get(section, "KEY", fallback="UNKNOWN"),
                 "friction": parser.getfloat(section, "FRICTION", fallback=0.98),
                 "damping": parser.getfloat(section, "DAMPING", fallback=0.0),
-                "is_valid_track": parser.getboolean(section, "IS_VALID_TRACK", fallback=True),
+                "is_valid_track": parser.getboolean(
+                    section, "IS_VALID_TRACK", fallback=True
+                ),
             }
             surfaces.append(surface)
         return surfaces
 
-    def _extract_boundaries(self, waypoints: list[Waypoint]) -> dict[str, list[list[float]]]:
+    def _extract_boundaries(
+        self, waypoints: list[Waypoint]
+    ) -> dict[str, list[list[float]]]:
         xyz = np.array([[wp.x, wp.y, wp.z] for wp in waypoints], dtype=np.float64)
         widths = np.array([wp.width for wp in waypoints], dtype=np.float64)
 
@@ -261,8 +306,19 @@ class TrackDataExtractor:
         }
 
     def _extract_drs_zones(self) -> list[dict[str, float]]:
-        search_roots = ([self.primary_layout] if self.primary_layout else []) + self.layout_dirs + [self.track_root]
-        path = next((root / "data" / "drs_zones.ini" for root in search_roots if root and (root / "data" / "drs_zones.ini").exists()), None)
+        search_roots = (
+            ([self.primary_layout] if self.primary_layout else [])
+            + self.layout_dirs
+            + [self.track_root]
+        )
+        path = next(
+            (
+                root / "data" / "drs_zones.ini"
+                for root in search_roots
+                if root and (root / "data" / "drs_zones.ini").exists()
+            ),
+            None,
+        )
         if path is None or not path.exists():
             # Yas Marina default placeholders.
             return [
@@ -277,10 +333,14 @@ class TrackDataExtractor:
             if "DRS" in section.upper():
                 zones.append(
                     {
-                        "zone": float(parser.get(section, "ID", fallback=len(zones) + 1)),
+                        "zone": float(
+                            parser.get(section, "ID", fallback=len(zones) + 1)
+                        ),
                         "start_m": parser.getfloat(section, "START", fallback=0.0),
                         "end_m": parser.getfloat(section, "END", fallback=0.0),
-                        "activation_m": parser.getfloat(section, "ACTIVATION", fallback=0.0),
+                        "activation_m": parser.getfloat(
+                            section, "ACTIVATION", fallback=0.0
+                        ),
                     }
                 )
         return zones
@@ -322,20 +382,46 @@ class TrackDataExtractor:
             "speed_limit_kmh_practice_qualifying": 80,
             "speed_limit_kmh_race": 60,
         }
-        search_roots = ([self.primary_layout] if self.primary_layout else []) + self.layout_dirs + [self.track_root]
-        path = next((root / "ai" / "pit_lane.csv" for root in search_roots if root and (root / "ai" / "pit_lane.csv").exists()), None)
+        search_roots = (
+            ([self.primary_layout] if self.primary_layout else [])
+            + self.layout_dirs
+            + [self.track_root]
+        )
+        path = next(
+            (
+                root / "ai" / "pit_lane.csv"
+                for root in search_roots
+                if root and (root / "ai" / "pit_lane.csv").exists()
+            ),
+            None,
+        )
         if path is not None and path.exists():
             rows = list(csv.DictReader(path.open("r", encoding="utf-8")))
             if rows:
                 first = rows[0]
                 last = rows[-1]
-                entry = [float(first.get("x", 0.0)), float(first.get("y", 0.0)), float(first.get("z", 0.0))]
-                exit_ = [float(last.get("x", 0.0)), float(last.get("y", 0.0)), float(last.get("z", 0.0))]
+                entry = [
+                    float(first.get("x", 0.0)),
+                    float(first.get("y", 0.0)),
+                    float(first.get("z", 0.0)),
+                ]
+                exit_ = [
+                    float(last.get("x", 0.0)),
+                    float(last.get("y", 0.0)),
+                    float(last.get("z", 0.0)),
+                ]
                 pit_data["entry_xyz"] = entry
                 pit_data["exit_xyz"] = exit_
         else:
             # If CSV unavailable, indicate pit lane presence when AI binary exists.
-            ai_pit = next((root / "ai" / "pit_lane.ai" for root in search_roots if root and (root / "ai" / "pit_lane.ai").exists()), None)
+            ai_pit = next(
+                (
+                    root / "ai" / "pit_lane.ai"
+                    for root in search_roots
+                    if root and (root / "ai" / "pit_lane.ai").exists()
+                ),
+                None,
+            )
             if ai_pit is not None:
                 pit_data["entry_xyz"] = [0.0, 0.0, 0.0]
                 pit_data["exit_xyz"] = [0.0, 0.0, 0.0]
@@ -374,7 +460,9 @@ class TrackDataExtractor:
         den[den == 0.0] = np.inf
         return num / den
 
-    def _save_all_formats(self, payload: dict[str, Any], waypoints: list[Waypoint]) -> None:
+    def _save_all_formats(
+        self, payload: dict[str, Any], waypoints: list[Waypoint]
+    ) -> None:
         json_path = self.output_root / f"{self.track_id}_track_data.json"
         csv_path = self.output_root / f"{self.track_id}_waypoints.csv"
         npz_path = self.output_root / f"{self.track_id}_track_arrays.npz"
@@ -403,7 +491,9 @@ class TrackDataExtractor:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Extract track data for RL processing.")
+    parser = argparse.ArgumentParser(
+        description="Extract track data for RL processing."
+    )
     parser.add_argument("--track-id", type=str, default="yas_marina")
     parser.add_argument("--config", type=Path, default=Path("configs/config.json"))
     return parser

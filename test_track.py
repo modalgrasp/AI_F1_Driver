@@ -20,11 +20,19 @@ def run_automated_tests(track_id: str) -> dict[str, Any]:
     t0 = time.perf_counter()
     validator = TrackValidator(track_id=track_id)
     report = validator.run()
-    results.append({"test": "track_validation", "pass": report["success"], "detail": "validator executed"})
+    results.append(
+        {
+            "test": "track_validation",
+            "pass": report["success"],
+            "detail": "validator executed",
+        }
+    )
 
     env = F1RacingEnv(config_path="configs/config.json", action_mode="continuous")
     obs, _ = env.reset(seed=123)
-    results.append({"test": "env_reset", "pass": len(obs) == 20, "detail": "observation shape"})
+    results.append(
+        {"test": "env_reset", "pass": len(obs) == 20, "detail": "observation shape"}
+    )
 
     step_times = []
     for _ in range(200):
@@ -39,8 +47,20 @@ def run_automated_tests(track_id: str) -> dict[str, Any]:
     load_time = (time.perf_counter() - t0) * 1000.0
     avg_step_ms = sum(step_times) / max(1, len(step_times))
 
-    results.append({"test": "performance_loading_ms", "pass": load_time < 15000.0, "detail": load_time})
-    results.append({"test": "performance_step_ms", "pass": avg_step_ms < 5.0, "detail": avg_step_ms})
+    results.append(
+        {
+            "test": "performance_loading_ms",
+            "pass": load_time < 15000.0,
+            "detail": load_time,
+        }
+    )
+    results.append(
+        {
+            "test": "performance_step_ms",
+            "pass": avg_step_ms < 5.0,
+            "detail": avg_step_ms,
+        }
+    )
 
     return {
         "track_id": track_id,

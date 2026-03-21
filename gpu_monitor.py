@@ -31,7 +31,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class GPUMonitor:
-    def __init__(self, poll_interval: float = 1.0, alert_temp_c: int = 80, alert_mem_pct: int = 90) -> None:
+    def __init__(
+        self,
+        poll_interval: float = 1.0,
+        alert_temp_c: int = 80,
+        alert_mem_pct: int = 90,
+    ) -> None:
         self.poll_interval = poll_interval
         self.alert_temp_c = alert_temp_c
         self.alert_mem_pct = alert_mem_pct
@@ -87,7 +92,9 @@ class GPUMonitor:
             )
 
         data["gpu_mem_percent"] = (
-            0.0 if data["gpu_mem_total_mb"] <= 0 else (100.0 * data["gpu_mem_used_mb"] / data["gpu_mem_total_mb"])
+            0.0
+            if data["gpu_mem_total_mb"] <= 0
+            else (100.0 * data["gpu_mem_used_mb"] / data["gpu_mem_total_mb"])
         )
         return data
 
@@ -119,7 +126,9 @@ class GPUMonitor:
         table.add_row("alerts", ", ".join(alerts) if alerts else "none")
         return table
 
-    def run(self, duration_sec: int = 30, csv_path: str | Path = "logs/gpu_metrics.csv") -> Path:
+    def run(
+        self, duration_sec: int = 30, csv_path: str | Path = "logs/gpu_metrics.csv"
+    ) -> Path:
         out = Path(csv_path)
         out.parent.mkdir(parents=True, exist_ok=True)
 
@@ -154,7 +163,10 @@ class GPUMonitor:
                     time.sleep(self.poll_interval)
 
         summary_path = out.with_suffix(".json")
-        summary_path.write_text(json.dumps({"csv": str(out), "duration_sec": duration_sec}, indent=2), encoding="utf-8")
+        summary_path.write_text(
+            json.dumps({"csv": str(out), "duration_sec": duration_sec}, indent=2),
+            encoding="utf-8",
+        )
         return out
 
 

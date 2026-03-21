@@ -55,7 +55,9 @@ def backup(target: Path = Path("backups")) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Developer utilities")
-    parser.add_argument("command", choices=["format", "lint", "test", "docs", "clean", "backup"])
+    parser.add_argument(
+        "command", choices=["format", "lint", "test", "docs", "clean", "backup"]
+    )
     parser.add_argument("--marker", default=None)
     args = parser.parse_args()
 
