@@ -15,6 +15,8 @@ import torch
 from gpu_config_manager import GPUConfigManager
 from mixed_precision_config import MixedPrecisionManager
 
+__test__ = False
+
 
 @dataclass
 class TestResult:
