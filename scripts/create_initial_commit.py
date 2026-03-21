@@ -220,14 +220,18 @@ def run_create_initial_commit(
     files = set(manifest_files(manifest))
 
     stage_counts = {}
+    commit_hash = ""
+    tag_name = "v0.1.0-phase1-complete"
     if not dry_run:
         try:
             stage_counts = stage_by_groups(repo, root, files, logger)
             if not repo.git.diff("--cached", "--name-only").strip():
-                raise RuntimeError("No files staged for commit. Check prepare_initial_commit output.")
+                logger.info("No new files staged; using existing HEAD commit for idempotent success.")
+                commit_hash = repo.head.commit.hexsha
+            else:
+                message = COMMIT_TEMPLATE.format(user_name=user_name, user_email=user_email)
+                commit_hash = commit_with_message(repo, message, sign=sign, logger=logger)
 
-            message = COMMIT_TEMPLATE.format(user_name=user_name, user_email=user_email)
-            commit_hash = commit_with_message(repo, message, sign=sign, logger=logger)
             tag_name = create_tag(
                 repo,
                 tag_name="v0.1.0-phase1-complete",
