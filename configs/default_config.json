@@ -1,0 +1,7 @@
+{
+  "project": "f1-racing-ai",
+  "version": "0.1.0",
+  "environment": "assetto_corsa",
+  "track": "yas_marina",
+  "seed": 42
+}

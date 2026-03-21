@@ -1,0 +1,1 @@
+"""Powertrain model placeholder."""

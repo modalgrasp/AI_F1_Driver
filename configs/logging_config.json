@@ -1,0 +1,8 @@
+{
+  "level": "INFO",
+  "console": true,
+  "file": true,
+  "directory": "logs",
+  "rotation_mb": 10,
+  "backups": 5
+}

@@ -1,0 +1,16 @@
+site_name: F1 Autonomous Racing AI Docs
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quickstart: quickstart.md
+  - User Guide:
+      - Overview: user_guide/overview.md
+  - API Reference:
+      - Modules: api_reference/modules.md
+  - Development:
+      - Workflow: development/workflow.md
+  - Tutorials:
+      - Training: tutorials/training.md
+  - FAQ: faq.md
+theme:
+  name: material

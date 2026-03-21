@@ -1,0 +1,15 @@
+{
+  "track_id": "yas_marina",
+  "centerline_points": 1200,
+  "sector_count": 3,
+  "episodes": [
+    {
+      "episode": 1,
+      "total_reward": 250.0,
+      "lap_progress_indicator": 0.0,
+      "sector_hits": [
+        1
+      ]
+    }
+  ]
+}

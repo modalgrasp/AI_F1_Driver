@@ -1,0 +1,11 @@
+{
+  "algorithm": "ppo",
+  "total_timesteps": 1000000,
+  "learning_rate": 0.0003,
+  "batch_size": 1024,
+  "gamma": 0.99,
+  "gae_lambda": 0.95,
+  "n_steps": 2048,
+  "gradient_clip_norm": 0.5,
+  "save_interval_steps": 10000
+}

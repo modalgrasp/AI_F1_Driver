@@ -1,0 +1,94 @@
+{
+  "track_id": "yas_marina",
+  "track_root": "D:\\SteamLibrary\\steamapps\\common\\assettocorsa\\content\\tracks\\acu_yasmarina",
+  "timestamp": "2026-03-21T17:53:06.010100+00:00",
+  "success": true,
+  "metadata": {
+    "name": "yas_marina",
+    "description": "",
+    "length_km": 5.281,
+    "corners": 16,
+    "pit_boxes": null,
+    "location": ""
+  },
+  "results": [
+    {
+      "check": "3d_model",
+      "status": "PASS",
+      "message": "Required content found.",
+      "recommendation": ""
+    },
+    {
+      "check": "models_ini",
+      "status": "PASS",
+      "message": "Required content found.",
+      "recommendation": ""
+    },
+    {
+      "check": "surfaces_ini",
+      "status": "PASS",
+      "message": "Required content found.",
+      "recommendation": ""
+    },
+    {
+      "check": "ai_line",
+      "status": "PASS",
+      "message": "Required content found.",
+      "recommendation": ""
+    },
+    {
+      "check": "map",
+      "status": "PASS",
+      "message": "Required content found.",
+      "recommendation": ""
+    },
+    {
+      "check": "track_length",
+      "status": "PASS",
+      "message": "Length within tolerance: 5.281 km",
+      "recommendation": ""
+    },
+    {
+      "check": "turn_count",
+      "status": "PASS",
+      "message": "Turns match expected count: 16",
+      "recommendation": ""
+    },
+    {
+      "check": "track_boundaries",
+      "status": "WARN",
+      "message": "Boundary coordinate files not found.",
+      "recommendation": "Generate boundaries from centerline and width model using track_data_extractor.py"
+    },
+    {
+      "check": "ai_spline",
+      "status": "PASS",
+      "message": "AI lane file exists.",
+      "recommendation": ""
+    },
+    {
+      "check": "drs_zones",
+      "status": "PASS",
+      "message": "DRS zones definition found.",
+      "recommendation": ""
+    },
+    {
+      "check": "pit_lane",
+      "status": "PASS",
+      "message": "Pit lane configuration present.",
+      "recommendation": ""
+    },
+    {
+      "check": "starting_grid",
+      "status": "WARN",
+      "message": "starting_grid.ini not found.",
+      "recommendation": "Verify spawn points in track editor or update mod."
+    },
+    {
+      "check": "surface_types",
+      "status": "PASS",
+      "message": "Surface definitions found: 44",
+      "recommendation": ""
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "device": "cuda:0",
+  "simulation_vram_reserve_gb": 2.5,
+  "training_vram_target_gb": 7.0,
+  "system_buffer_gb": 2.0,
+  "torch": {
+    "cudnn_benchmark": true,
+    "cudnn_deterministic": false,
+    "allow_tf32": true,
+    "matmul_precision": "high"
+  },
+  "monitoring": {
+    "poll_interval_sec": 1.0,
+    "alert_temp_c": 80,
+    "alert_vram_percent": 90
+  },
+  "amp": {
+    "enabled": true,
+    "dtype": "float16",
+    "init_scale": 65536
+  },
+  "parallel_env": {
+    "max_workers": 8,
+    "render_batch_size": 8
+  }
+}

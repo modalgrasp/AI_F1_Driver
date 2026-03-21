@@ -1,0 +1,74 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+f1_racing_env/
+venv/
+env/
+.venv/
+
+# Build and packaging
+build/
+dist/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# Logs and reports
+logs/
+*.log
+*.txt
+coverage.xml
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Models and checkpoints
+models/checkpoints/
+models/artifacts/
+*.pt
+*.pth
+*.pkl
+*.onnx
+
+# Data and generated outputs
+data/downloads/
+data/backups/
+data/tracks/*/extracted/
+data/tracks/*/visualizations/
+data/tracks/*/analysis/
+data/tracks/*/tests/
+*.csv
+*.h5
+*.hdf5
+*.npz
+
+# Notebooks
+.ipynb_checkpoints/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Temporary files/folders
+tmp/
+temp/
+*.tmp
+
+# Local overrides
+configs/local_config.json
+*.local
+
+# Git LFS lock files
+*.lfs
