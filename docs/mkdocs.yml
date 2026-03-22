@@ -1,4 +1,6 @@
 site_name: F1 Autonomous Racing AI Docs
+docs_dir: .
+site_dir: ../site
 nav:
   - Home: index.md
   - Installation: installation.md

@@ -155,7 +155,6 @@ class TireModel:
         cliff_threshold = float(deg["cliff_wear_threshold"])
         cliff_severity = float(deg["cliff_severity"])
 
-        wear_fraction = np.clip(wear / 100.0, 0.0, 1.0)
         base = 1.0 - perf_loss * wear
         cliff_input = np.maximum(wear - cliff_threshold, 0.0) / max(
             100.0 - cliff_threshold, EPSILON
