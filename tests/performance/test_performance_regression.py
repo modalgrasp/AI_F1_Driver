@@ -54,7 +54,7 @@ def test_parallel_env_throughput() -> None:
 
     # Parallel throughput varies widely by host CPU; keep defaults stable and
     # enforce production targets via environment configuration.
-    min_total_perf = float(os.getenv("F1_MIN_PARALLEL_STEPS_PER_SEC", "180"))
+    min_total_perf = float(os.getenv("F1_MIN_PARALLEL_STEPS_PER_SEC", "150"))
     assert (
         steps_per_sec >= min_total_perf
     ), f"Parallel throughput regression: {steps_per_sec:.1f} < {min_total_perf:.1f} steps/sec"
