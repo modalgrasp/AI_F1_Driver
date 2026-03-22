@@ -1,0 +1,219 @@
+{
+  "compounds": {
+    "soft": {
+      "name": "Soft (C5)",
+      "color": "red",
+      "normal_load_nominal": 4500.0,
+      "lateral_force": {
+        "B": 10.5,
+        "C": 1.35,
+        "D_nominal": 2.1,
+        "E": -0.8,
+        "load_sensitivity": 0.15
+      },
+      "longitudinal_force": {
+        "B_accel": 12.0,
+        "B_brake": 13.0,
+        "C": 1.3,
+        "D_nominal_accel": 2.0,
+        "D_nominal_brake": 2.2,
+        "E": -0.5,
+        "load_sensitivity": 0.12
+      },
+      "combined_slip": {
+        "B_xalpha": 6.0,
+        "C_xalpha": 1.05,
+        "B_ykappa": 10.0,
+        "C_ykappa": 1.1,
+        "scaling_factor": 0.95
+      },
+      "temperature": {
+        "optimal": 100.0,
+        "range": 10.0,
+        "min_operating": 70.0,
+        "max_operating": 130.0,
+        "warmup_rate": 0.8,
+        "cooling_rate": 0.3
+      },
+      "degradation": {
+        "wear_rate_base": 0.08,
+        "performance_loss_coef": 0.012,
+        "cliff_wear_threshold": 75.0,
+        "cliff_severity": 2.5,
+        "n_lat": 1.3,
+        "n_long": 1.2
+      },
+      "physical": {
+        "radius": 0.33,
+        "width": 0.405,
+        "mass": 11.5,
+        "inertia": 1.2,
+        "cold_pressure_psi": 18.5,
+        "optimal_pressure_psi": 20.0
+      },
+      "camber": {
+        "optimal_deg": -3.0,
+        "sensitivity": 3.2
+      },
+      "rolling_resistance": {
+        "C_rr_base": 0.011
+      },
+      "pneumatic_trail": {
+        "trail_nominal": 0.08,
+        "decay_rate": 6.5
+      },
+      "thermal": {
+        "mass_surface": 1.2,
+        "mass_core": 10.3,
+        "cp": 1900.0,
+        "h_convection": 60.0,
+        "k_surface_to_core": 120.0
+      }
+    },
+    "medium": {
+      "name": "Medium (C4)",
+      "color": "yellow",
+      "normal_load_nominal": 4500.0,
+      "lateral_force": {
+        "B": 9.8,
+        "C": 1.33,
+        "D_nominal": 1.9,
+        "E": -0.75,
+        "load_sensitivity": 0.13
+      },
+      "longitudinal_force": {
+        "B_accel": 11.2,
+        "B_brake": 12.2,
+        "C": 1.28,
+        "D_nominal_accel": 1.85,
+        "D_nominal_brake": 2.0,
+        "E": -0.48,
+        "load_sensitivity": 0.11
+      },
+      "combined_slip": {
+        "B_xalpha": 5.8,
+        "C_xalpha": 1.05,
+        "B_ykappa": 9.5,
+        "C_ykappa": 1.08,
+        "scaling_factor": 0.96
+      },
+      "temperature": {
+        "optimal": 95.0,
+        "range": 11.0,
+        "min_operating": 68.0,
+        "max_operating": 128.0,
+        "warmup_rate": 0.65,
+        "cooling_rate": 0.32
+      },
+      "degradation": {
+        "wear_rate_base": 0.055,
+        "performance_loss_coef": 0.009,
+        "cliff_wear_threshold": 82.0,
+        "cliff_severity": 1.8,
+        "n_lat": 1.2,
+        "n_long": 1.15
+      },
+      "physical": {
+        "radius": 0.33,
+        "width": 0.405,
+        "mass": 11.8,
+        "inertia": 1.22,
+        "cold_pressure_psi": 18.5,
+        "optimal_pressure_psi": 20.3
+      },
+      "camber": {
+        "optimal_deg": -2.8,
+        "sensitivity": 2.9
+      },
+      "rolling_resistance": {
+        "C_rr_base": 0.0105
+      },
+      "pneumatic_trail": {
+        "trail_nominal": 0.082,
+        "decay_rate": 6.0
+      },
+      "thermal": {
+        "mass_surface": 1.25,
+        "mass_core": 10.55,
+        "cp": 1920.0,
+        "h_convection": 57.0,
+        "k_surface_to_core": 116.0
+      }
+    },
+    "hard": {
+      "name": "Hard (C3)",
+      "color": "white",
+      "normal_load_nominal": 4500.0,
+      "lateral_force": {
+        "B": 9.2,
+        "C": 1.31,
+        "D_nominal": 1.72,
+        "E": -0.7,
+        "load_sensitivity": 0.11
+      },
+      "longitudinal_force": {
+        "B_accel": 10.5,
+        "B_brake": 11.5,
+        "C": 1.25,
+        "D_nominal_accel": 1.65,
+        "D_nominal_brake": 1.8,
+        "E": -0.45,
+        "load_sensitivity": 0.1
+      },
+      "combined_slip": {
+        "B_xalpha": 5.4,
+        "C_xalpha": 1.02,
+        "B_ykappa": 9.0,
+        "C_ykappa": 1.05,
+        "scaling_factor": 0.97
+      },
+      "temperature": {
+        "optimal": 90.0,
+        "range": 13.0,
+        "min_operating": 65.0,
+        "max_operating": 125.0,
+        "warmup_rate": 0.5,
+        "cooling_rate": 0.35
+      },
+      "degradation": {
+        "wear_rate_base": 0.035,
+        "performance_loss_coef": 0.006,
+        "cliff_wear_threshold": 90.0,
+        "cliff_severity": 1.2,
+        "n_lat": 1.15,
+        "n_long": 1.1
+      },
+      "physical": {
+        "radius": 0.33,
+        "width": 0.405,
+        "mass": 12.0,
+        "inertia": 1.24,
+        "cold_pressure_psi": 18.5,
+        "optimal_pressure_psi": 20.6
+      },
+      "camber": {
+        "optimal_deg": -2.6,
+        "sensitivity": 2.7
+      },
+      "rolling_resistance": {
+        "C_rr_base": 0.01
+      },
+      "pneumatic_trail": {
+        "trail_nominal": 0.084,
+        "decay_rate": 5.6
+      },
+      "thermal": {
+        "mass_surface": 1.3,
+        "mass_core": 10.7,
+        "cp": 1940.0,
+        "h_convection": 55.0,
+        "k_surface_to_core": 112.0
+      }
+    }
+  },
+  "environmental": {
+    "track_temp_effect": 0.05,
+    "ambient_temp_effect": 0.03,
+    "humidity_effect": 0.01
+  }
+}

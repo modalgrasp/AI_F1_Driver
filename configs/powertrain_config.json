@@ -1,0 +1,55 @@
+{
+  "has_mguh": false,
+  "wheel_radius_m": 0.33,
+  "drivetrain_tau": 0.03,
+  "ice": {
+    "displacement": 1.6,
+    "cylinders": 6,
+    "max_rpm": 15000,
+    "idle_rpm": 5000,
+    "max_power": 373000,
+    "max_torque": 380,
+    "peak_rpm": 11000,
+    "bsfc_min": 0.22,
+    "redline": 15000,
+    "max_boost_bar": 3.5,
+    "turbo_tau": 0.3,
+    "initial_boost_bar": 0.1
+  },
+  "mguk": {
+    "max_motor_power": 373000,
+    "max_generator_power": 350000,
+    "max_torque": 500,
+    "efficiency_motor": 0.95,
+    "efficiency_generator": 0.9,
+    "base_speed_rpm": 7000
+  },
+  "battery": {
+    "capacity_kwh": 10.0,
+    "max_charge_rate": 350000,
+    "max_discharge_rate": 350000,
+    "initial_soc": 0.5,
+    "min_soc": 0.1,
+    "optimal_temp_range": [30, 45],
+    "initial_temp_c": 25
+  },
+  "transmission": {
+    "num_gears": 8,
+    "gear_ratios": [3.2, 2.5, 2.05, 1.75, 1.52, 1.35, 1.22, 1.12],
+    "final_drive": 3.0,
+    "efficiency": 0.97,
+    "shift_time": 0.05
+  },
+  "fuel": {
+    "capacity_kg": 110,
+    "max_flow_rate": 0.0278,
+    "density": 750,
+    "energy_content_mj_kg": 43.0
+  },
+  "overtake_mode": {
+    "extra_power": 100000,
+    "activation_gap_seconds": 1.0,
+    "duration_limit": 10.0,
+    "cooldown": 5.0
+  }
+}

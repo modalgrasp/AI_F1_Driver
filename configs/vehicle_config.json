@@ -1,0 +1,32 @@
+{
+  "mass": {
+    "car_mass": 798,
+    "fuel_capacity": 110,
+    "driver_mass": 0
+  },
+  "dimensions": {
+    "wheelbase": 3.6,
+    "track_front": 1.6,
+    "track_rear": 1.6,
+    "cg_height": 0.35,
+    "cg_to_front": 1.6
+  },
+  "inertia": {
+    "Iz": 1500,
+    "Ix": 300,
+    "Iy": 1800
+  },
+  "suspension": {
+    "roll_stiffness": 100000,
+    "pitch_stiffness": 150000,
+    "roll_damping": 5000,
+    "pitch_damping": 7000,
+    "arb_front": 50000,
+    "arb_rear": 60000
+  },
+  "integration": {
+    "method": "RK4",
+    "max_dt": 0.001,
+    "tolerance": 1e-6
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "reference": {
+    "frontal_area": 1.6,
+    "front_area": 0.8,
+    "rear_area": 0.8,
+    "reference_length": 5.5,
+    "wheelbase": 3.6
+  },
+  "modes": {
+    "high_downforce": {
+      "CL_front": -3.5,
+      "CL_rear": -4.0,
+      "CD_base": 1.15,
+      "transition_time": 0.15
+    },
+    "low_drag": {
+      "CL_front": -1.8,
+      "CL_rear": -2.0,
+      "CD_base": 0.7,
+      "transition_time": 0.15
+    }
+  },
+  "ground_effect": {
+    "optimal_ride_height": 0.05,
+    "min_ride_height": 0.025,
+    "sensitivity": 0.3
+  },
+  "dirty_air": {
+    "max_downforce_loss": 0.25,
+    "peak_distance": 5.0,
+    "effect_range": 10.0
+  },
+  "environmental": {
+    "reference_temperature": 25.0,
+    "reference_pressure": 101325.0,
+    "reference_humidity": 0.5,
+    "air_viscosity": 1.81e-5
+  },
+  "cooling": {
+    "brake_duct_drag": 0.05,
+    "radiator_drag": 0.1
+  }
+}

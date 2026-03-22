@@ -1,0 +1,44 @@
+{
+  "summary": {
+    "all_passed": false,
+    "subsystems_passed": 4,
+    "subsystems_total": 5,
+    "confidence": {
+      "Tire Model": 0.86,
+      "Aerodynamics Model": 0.91,
+      "Powertrain Model": 0.94,
+      "Vehicle Dynamics": 0.78,
+      "Lap Simulation": 0.62
+    }
+  },
+  "results": {
+    "Tire Model": {
+      "all_passed": true,
+      "individual_tests": []
+    },
+    "Aerodynamics Model": {
+      "all_passed": true,
+      "individual_tests": []
+    },
+    "Powertrain Model": {
+      "all_passed": true,
+      "individual_tests": []
+    },
+    "Vehicle Dynamics": {
+      "all_passed": false,
+      "individual_tests": [
+        {
+          "test_name": "Top Speed",
+          "passed": false,
+          "details": [
+            "Top speed 287.0km/h outside [315, 365]km/h."
+          ]
+        }
+      ]
+    },
+    "Lap Simulation": {
+      "all_passed": false,
+      "individual_tests": []
+    }
+  }
+}

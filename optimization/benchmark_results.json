@@ -1,0 +1,18 @@
+{
+  "single_step": {
+    "iterations": 10000,
+    "elapsed_seconds": 36.46970610000426,
+    "steps_per_second": 274.2001806260466,
+    "ms_per_step": 3.6469706100004258
+  },
+  "parallel": {
+    "num_environments": 8,
+    "steps_per_environment": 2000,
+    "total_steps": 16000,
+    "elapsed_seconds": 80.61937359999865,
+    "steps_per_second": 198.46346213734745
+  },
+  "steps_per_second": 274.2001806260466,
+  "ms_per_step": 3.6469706100004258,
+  "memory_mb": null
+}
