@@ -1,0 +1,59 @@
+# Core RL environment API
+# Gymnasium is the maintained successor to OpenAI Gym
+# Install latest compatible release.
+
+gymnasium
+
+# Deep learning stack (PyTorch) is installed explicitly by setup.bat:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130
+# Keeping it out of this file avoids wheel conflicts across Python versions.
+
+# RL algorithms
+# NOTE: Stable-Baselines3 may lag behind very new Python versions.
+stable-baselines3; python_version < "3.14"
+
+# Numerical and tabular processing
+numpy
+pandas
+scipy
+
+# Visualization and analytics
+matplotlib
+plotly
+tensorboard; python_version < "3.14"
+
+# Environment and utility support
+psutil
+pyyaml
+packaging
+tqdm
+
+# Logging and diagnostics helpers
+colorama
+rich
+
+# Shared memory / platform access
+# On Linux, posix_ipc helps shared memory interoperability
+# On Windows, pywin32 gives low-level native integration
+posix-ipc; platform_system == "Linux"
+# pywin32 currently has no wheel for some Python 3.14 builds, so keep it optional.
+pywin32; platform_system == "Windows" and python_version < "3.14"
+
+# Optional GPU diagnostics
+GPUtil
+rarfile
+pynvml
+fastapi
+uvicorn
+
+# Testing and quality checks
+pytest
+pytest-benchmark
+
+# Assetto Corsa Gym bridge dependencies (common stack)
+# If your chosen AC gym package has additional dependencies, install those too.
+pygame-ce
+requests
+
+# Optional: install an Assetto Corsa Gym adapter package if you use one.
+# assetto-corsa-gym==0.3.2
